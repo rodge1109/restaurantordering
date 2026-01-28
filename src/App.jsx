@@ -212,36 +212,34 @@ export default function RestaurantApp() {
           --tw-gradient-to: #008C3C !important;
         }
       `}</style>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 flex justify-center">
-        <div className="w-full max-w-7xl">
-          <Header 
-            currentPage={currentPage} 
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900">
+        <Header
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setShowCart={setShowCart}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+        {currentPage === 'home' && (
+          <HomePage
             setCurrentPage={setCurrentPage}
-            setShowCart={setShowCart}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
+            menuData={menuData}
+            isLoading={isLoadingProducts}
           />
-          {currentPage === 'home' && (
-            <HomePage
-              setCurrentPage={setCurrentPage}
-              menuData={menuData}
-              isLoading={isLoadingProducts}
-            />
-          )}
-          {currentPage === 'menu' && (
-            <MenuPage
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              searchQuery={searchQuery}
-              menuData={menuData}
-              isLoading={isLoadingProducts}
-            />
-          )}
-          {currentPage === 'cart' && <CartPage setCurrentPage={setCurrentPage} />}
-          {currentPage === 'checkout' && <CheckoutPage setCurrentPage={setCurrentPage} />}
-          {currentPage === 'confirmation' && <ConfirmationPage setCurrentPage={setCurrentPage} />}
-          {showCart && <CartDrawer setShowCart={setShowCart} setCurrentPage={setCurrentPage} />}
-        </div>
+        )}
+        {currentPage === 'menu' && (
+          <MenuPage
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            searchQuery={searchQuery}
+            menuData={menuData}
+            isLoading={isLoadingProducts}
+          />
+        )}
+        {currentPage === 'cart' && <CartPage setCurrentPage={setCurrentPage} />}
+        {currentPage === 'checkout' && <CheckoutPage setCurrentPage={setCurrentPage} />}
+        {currentPage === 'confirmation' && <ConfirmationPage setCurrentPage={setCurrentPage} />}
+        {showCart && <CartDrawer setShowCart={setShowCart} setCurrentPage={setCurrentPage} />}
       </div>
     </CartContext.Provider>
   );
@@ -642,48 +640,53 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
   });
 
   return (
-    <div className="bg-gray-50 min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-4">
-      <h1 className="text-5xl font-black text-green-600 mb-12 text-center">📋 OUR MENU</h1>
-
-      {isLoading ? (
-        <div className="text-center py-16">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
-          <p className="text-xl text-green-600 font-bold">Loading menu...</p>
-        </div>
-      ) : (
-        <>
-          {/* Category Filter */}
-          <div className="flex overflow-x-auto space-x-3 mb-8 pb-2">
+    <div className="bg-gray-50 min-h-screen">
+      {/* Category Filter - Right below header */}
+      <div className="bg-white shadow-md sticky top-[73px] z-40">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex overflow-x-auto space-x-1 py-3">
             {categories.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-lg font-black whitespace-nowrap transition-all text-sm tracking-wider ${
+                className={`px-3 py-2 font-medium whitespace-nowrap transition-all text-xs tracking-wide ${
                   selectedCategory === category
-                    ? 'bg-green-600 text-green-300 shadow-lg'
-                    : 'bg-white text-green-600 hover:bg-green-100 border-2 border-green-600'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {category.toUpperCase()}
               </button>
             ))}
           </div>
+        </div>
+      </div>
 
-          {/* Menu Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredItems.map(item => (
-              <MenuItem key={item.id} item={item} />
-            ))}
+      {/* Menu Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-semibold text-green-600 mb-8 text-center">OUR MENU</h1>
+
+        {isLoading ? (
+          <div className="text-center py-16">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+            <p className="text-xl text-green-600 font-bold">Loading menu...</p>
           </div>
-
-          {filteredItems.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-2xl text-gray-400">No items found</p>
+        ) : (
+          <>
+            {/* Menu Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredItems.map(item => (
+                <MenuItem key={item.id} item={item} />
+              ))}
             </div>
-          )}
-        </>
-      )}
+
+            {filteredItems.length === 0 && (
+              <div className="text-center py-16">
+                <p className="text-2xl text-gray-400">No items found</p>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -694,11 +697,11 @@ function MenuItem({ item }) {
   const { addToCart } = useCart();
 
   return (
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full flex flex-row h-auto">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full flex flex-row h-auto min-h-[140px]">
         {/* Left side - Product Image */}
         <div className="bg-gray-50 p-4 flex items-center justify-center w-32 sm:w-36 flex-shrink-0 relative">
           {item.image && item.image.startsWith('assets/') ? (
-            <img src={item.image} alt={item.name} className="object-contain w-full h-24 sm:h-28 rounded-lg group-hover:scale-110 transition-transform duration-300" />
+            <img src={item.image} alt={item.name} className="object-contain w-full h-32 sm:h-36 rounded-lg group-hover:scale-110 transition-transform duration-300" />
           ) : (
             <div className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">{item.image}</div>
           )}
@@ -712,14 +715,14 @@ function MenuItem({ item }) {
       {/* Right side - Product Details */}
       <div className="p-3 sm:p-4 flex flex-col justify-between flex-1 min-w-0">
         <div>
-          <h3 className="text-base sm:text-lg font-black text-green-600 mb-1 truncate">{item.name}</h3>
-          <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2 font-semibold">{item.description}</p>
+          <h3 className="text-sm sm:text-base font-medium text-green-600 mb-1 truncate">{item.name}</h3>
+          <p className="text-gray-600 text-xs mb-2 line-clamp-2 font-normal">{item.description}</p>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xl sm:text-2xl font-black text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
+          <span className="text-lg sm:text-xl font-semibold text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
           <button
             onClick={() => addToCart(item)}
-            className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 text-xs sm:text-sm font-black flex-shrink-0"
+            className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 text-xs font-medium flex-shrink-0"
           >
             <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>ADD</span>
