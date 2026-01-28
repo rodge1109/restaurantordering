@@ -642,9 +642,9 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
   });
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-gray-50 min-h-screen py-16">
       <div className="max-w-7xl mx-auto px-4">
-      <h1 className="text-5xl font-black text-green-600 mb-8">📋 OUR MENU</h1>
+      <h1 className="text-5xl font-black text-green-600 mb-12 text-center">📋 OUR MENU</h1>
 
       {isLoading ? (
         <div className="text-center py-16">
@@ -671,7 +671,7 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
           </div>
 
           {/* Menu Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredItems.map(item => (
               <MenuItem key={item.id} item={item} />
             ))}
@@ -694,29 +694,34 @@ function MenuItem({ item }) {
   const { addToCart } = useCart();
 
   return (
-      <div className="bg-gray-50 rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full h-96 flex flex-col">
-        <div className="bg-gray-50 p-6 text-center relative flex-1 flex flex-col justify-center">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full flex flex-row h-auto">
+        {/* Left side - Product Image */}
+        <div className="bg-gray-50 p-4 flex items-center justify-center w-32 sm:w-36 flex-shrink-0 relative">
           {item.image && item.image.startsWith('assets/') ? (
-            <img src={item.image} alt={item.name} className="object-contain mx-auto rounded-lg h-32 w-32 group-hover:scale-125 transition-transform duration-300 bg-gray-50" />
+            <img src={item.image} alt={item.name} className="object-contain w-full h-24 sm:h-28 rounded-lg group-hover:scale-110 transition-transform duration-300" />
           ) : (
-            <div className="text-6xl group-hover:scale-125 transition-transform duration-300">{item.image}</div>
+            <div className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">{item.image}</div>
           )}
           {item.popular && (
-            <span className="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-black">
-            POPULAR
+            <span className="absolute top-1 right-1 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-black">
+            HOT
           </span>
         )}
       </div>
-      <div className="p-4 flex flex-col justify-between h-40">
-        <h3 className="text-lg font-black text-green-600 mb-1">{item.name}</h3>
-        <p className="text-gray-600 text-xs mb-3 line-clamp-2 font-semibold">{item.description}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-black text-green-600">Php {item.price.toFixed(2)}</span>
-          <button 
+
+      {/* Right side - Product Details */}
+      <div className="p-3 sm:p-4 flex flex-col justify-between flex-1 min-w-0">
+        <div>
+          <h3 className="text-base sm:text-lg font-black text-green-600 mb-1 truncate">{item.name}</h3>
+          <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2 font-semibold">{item.description}</p>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xl sm:text-2xl font-black text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
+          <button
             onClick={() => addToCart(item)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 text-sm font-black"
+            className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 text-xs sm:text-sm font-black flex-shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>ADD</span>
           </button>
         </div>
@@ -795,9 +800,9 @@ function CartPage({ setCurrentPage }) {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-gray-50 min-h-screen py-16">
       <div className="max-w-7xl mx-auto px-4">
-      <h1 className="text-5xl font-black text-green-600 mb-8">🛒 YOUR CART</h1>
+      <h1 className="text-5xl font-black text-green-600 mb-12 text-center">🛒 YOUR CART</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="space-y-4 mb-6 bg-white bg-opacity-80 backdrop-blur-sm p-6 rounded-xl shadow-md">
@@ -958,9 +963,9 @@ function CheckoutPage({ setCurrentPage }) {
   const total = getTotalPrice() + deliveryFee + tax;
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-gray-50 min-h-screen py-16">
       <div className="max-w-7xl mx-auto px-4">
-      <h1 className="text-5xl font-black text-green-600 mb-8">💳 CHECKOUT</h1>
+      <h1 className="text-5xl font-black text-green-600 mb-12 text-center">💳 CHECKOUT</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -1123,12 +1128,12 @@ function CheckoutPage({ setCurrentPage }) {
 // Confirmation Page
 function ConfirmationPage({ setCurrentPage }) {
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-gray-50 min-h-screen py-16">
       <div className="max-w-2xl mx-auto px-4">
-      <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl p-8 text-center mb-8 shadow-2xl">
+      <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl p-12 text-center mb-8 shadow-2xl mt-8">
         <div className="text-6xl mb-4 animate-bounce">✅</div>
-        <h1 className="text-4xl font-black text-white mb-2">ORDER CONFIRMED!</h1>
-        <p className="text-white text-lg font-black">Thank you for your order. Your delicious food is on the way!</p>
+        <h1 className="text-5xl font-black text-white mb-4">ORDER CONFIRMED!</h1>
+        <p className="text-white text-xl font-black">Thank you for your order. Your delicious food is on the way!</p>
       </div>
 
       <div className="bg-green-600 rounded-xl p-6 mb-8 shadow-lg">
