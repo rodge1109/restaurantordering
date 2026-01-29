@@ -144,6 +144,14 @@ export default function RestaurantApp() {
         .animate-fadeIn {
           animation: fadeIn 0.8s ease-out forwards;
         }
+        /* Hide scrollbar for category filter */
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
         /* Boston Celtics Green Color Override */
         .bg-green-600 {
           background-color: #007A33 !important;
@@ -254,10 +262,10 @@ function Header({ currentPage, setCurrentPage, setShowCart, searchQuery, setSear
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-            <div className="text-5xl font-black text-white drop-shadow-lg">M</div>
+            <div className="text-5xl font-black text-white drop-shadow-lg">K</div>
             <div>
-              <h1 className="text-3xl font-black text-white drop-shadow-lg tracking-wider">Kuchefnero</h1>
-              <p className="text-xs text-white font-bold">Food Ordering System</p>
+              <h1 className="text-3xl font-black text-white drop-shadow-lg tracking-wider">Kuchefnero.ph</h1>
+              <p className="text-xs text-white font-bold">Food Ordering System (ver 1.0)</p>
             </div>
           </div>
 
@@ -455,9 +463,9 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
       </section>
 
       {/* Popular Items */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-5xl font-black text-green-600 mb-12 text-center drop-shadow-lg">⭐ POPULAR NOW</h2>
+      <section className="bg-gray-50 py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-green-600 mb-8 sm:mb-12 text-center drop-shadow-lg">⭐ POPULAR NOW</h2>
         {isLoading ? (
           <div className="text-center py-16">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
@@ -465,12 +473,12 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {popularItems.map(item => (
                 <PopularItemCard key={item.id} item={item} />
               ))}
             </div>
-            <div className="text-center mt-12">
+            <div className="text-center mt-8 sm:mt-12">
               <button
                 onClick={() => setCurrentPage('menu')}
                 className="bg-red-600 text-white px-8 py-3 rounded-lg font-black hover:bg-red-700 transition-all shadow-lg text-sm tracking-wider"
@@ -485,7 +493,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
 
       {/* Features & Contact Info */}
       <section className="bg-gray-50 py-2">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center mb-16">
             <div className="bg-green-600 p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
@@ -643,13 +651,13 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
     <div className="bg-gray-50 min-h-screen">
       {/* Category Filter - Right below header */}
       <div className="bg-white shadow-md sticky top-[73px] z-40">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex overflow-x-auto space-x-1 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex overflow-x-auto space-x-1 py-3 scrollbar-hide">
             {categories.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-2 font-medium whitespace-nowrap transition-all text-xs tracking-wide ${
+                className={`px-3 py-2 rounded-md font-medium whitespace-nowrap transition-all text-xs tracking-wide ${
                   selectedCategory === category
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -663,8 +671,8 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
       </div>
 
       {/* Menu Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-semibold text-green-600 mb-8 text-center">OUR MENU</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-green-600 mb-6 sm:mb-8 text-center">OUR MENU</h1>
 
         {isLoading ? (
           <div className="text-center py-16">
@@ -673,8 +681,8 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
           </div>
         ) : (
           <>
-            {/* Menu Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            {/* Menu Grid - Optimized for horizontal cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
               {filteredItems.map(item => (
                 <MenuItem key={item.id} item={item} />
               ))}
@@ -697,13 +705,13 @@ function MenuItem({ item }) {
   const { addToCart } = useCart();
 
   return (
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full flex flex-row h-auto min-h-[140px]">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full flex flex-row h-auto min-h-[140px] sm:min-h-[150px]">
         {/* Left side - Product Image */}
-        <div className="bg-gray-50 p-4 flex items-center justify-center w-32 sm:w-36 flex-shrink-0 relative">
+        <div className="bg-gray-50 p-3 sm:p-4 flex items-center justify-center w-28 sm:w-32 md:w-36 flex-shrink-0 relative">
           {item.image && item.image.startsWith('assets/') ? (
-            <img src={item.image} alt={item.name} className="object-contain w-full h-32 sm:h-36 rounded-lg group-hover:scale-110 transition-transform duration-300" />
+            <img src={item.image} alt={item.name} className="object-contain w-full h-28 sm:h-32 md:h-36 rounded-lg group-hover:scale-110 transition-transform duration-300" />
           ) : (
-            <div className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">{item.image}</div>
+            <div className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">{item.image}</div>
           )}
           {item.popular && (
             <span className="absolute top-1 right-1 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-black">
@@ -716,13 +724,13 @@ function MenuItem({ item }) {
       <div className="p-3 sm:p-4 flex flex-col justify-between flex-1 min-w-0">
         <div>
           <h3 className="text-sm sm:text-base font-medium text-green-600 mb-1 truncate">{item.name}</h3>
-          <p className="text-gray-600 text-xs mb-2 line-clamp-2 font-normal">{item.description}</p>
+          <p className="text-gray-600 text-xs sm:text-xs mb-2 line-clamp-2 font-normal">{item.description}</p>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <span className="text-lg sm:text-xl font-semibold text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
+          <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
           <button
             onClick={() => addToCart(item)}
-            className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 text-xs font-medium flex-shrink-0"
+            className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 text-xs font-medium flex-shrink-0 hover:scale-105"
           >
             <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>ADD</span>
