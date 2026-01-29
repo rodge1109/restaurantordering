@@ -15,10 +15,10 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYH_e2AeORBF
 
 // Fallback Menu Data (used if Google Sheets fetch fails)
 const fallbackMenuData = [
-  { id: 1, name: 'Margherita Pizza', category: 'Pizza', price: 12.99, image: 'assets/images/food/pepperoni.png', description: 'Classic tomato sauce, mozzarella, fresh basil', popular: true },
-  { id: 2, name: 'Pepperoni Pizza', category: 'Pizza', price: 14.99, image: 'assets/images/food/burgerpizza.png', description: 'Loaded with pepperoni and mozzarella', popular: true },
-  { id: 3, name: 'BBQ Chicken Pizza', category: 'Pizza', price: 15.99, image: 'assets/images/food/pepperoni.png', description: 'BBQ sauce, grilled chicken, red onions', popular: false },
-  { id: 4, name: 'Veggie Supreme', category: 'Pizza', price: 13.99, image: 'assets/images/food/pepperoni.png', description: 'Mushrooms, peppers, olives, onions', popular: false },
+  { id: 1, name: 'Margherita Pizza', category: 'Pizza', sizes: [{ name: 'Small', price: 10.99 }, { name: 'Medium', price: 12.99 }, { name: 'Large', price: 15.99 }], image: 'assets/images/food/pepperoni.png', description: 'Classic tomato sauce, mozzarella, fresh basil', popular: true },
+  { id: 2, name: 'Pepperoni Pizza', category: 'Pizza', sizes: [{ name: 'Small', price: 12.99 }, { name: 'Medium', price: 14.99 }, { name: 'Large', price: 17.99 }], image: 'assets/images/food/burgerpizza.png', description: 'Loaded with pepperoni and mozzarella', popular: true },
+  { id: 3, name: 'BBQ Chicken Pizza', category: 'Pizza', sizes: [{ name: 'Small', price: 13.99 }, { name: 'Medium', price: 15.99 }, { name: 'Large', price: 18.99 }], image: 'assets/images/food/pepperoni.png', description: 'BBQ sauce, grilled chicken, red onions', popular: false },
+  { id: 4, name: 'Veggie Supreme', category: 'Pizza', sizes: [{ name: 'Small', price: 11.99 }, { name: 'Medium', price: 13.99 }, { name: 'Large', price: 16.99 }], image: 'assets/images/food/pepperoni.png', description: 'Mushrooms, peppers, olives, onions', popular: false },
 
   { id: 5, name: 'Classic Burger', category: 'Burgers', price: 9.99, image: 'assets/images/food/pepperoni.png', description: 'Beef patty, lettuce, tomato, cheese', popular: true },
   { id: 6, name: 'Bacon Cheeseburger', category: 'Burgers', price: 11.99, image: 'assets/images/food/pepperoni.png', description: 'Double beef, bacon, cheddar cheese', popular: true },
@@ -51,6 +51,8 @@ export default function RestaurantApp() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCart, setShowCart] = useState(false);
+  const [showSizeModal, setShowSizeModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Products state
   const [menuData, setMenuData] = useState(fallbackMenuData);
@@ -86,27 +88,56 @@ export default function RestaurantApp() {
     fetchProducts();
   }, []);
 
-  const addToCart = (item) => {
-    const existingItem = cartItems.find(i => i.id === item.id);
+  const addToCart = (item, selectedSize = null) => {
+    console.log('addToCart called:', { item, selectedSize, hasSizes: !!item.sizes });
+
+    // For items with sizes, we need size info
+    if (item.sizes && !selectedSize) {
+      console.log('Opening size modal for:', item.name);
+      setSelectedProduct(item);
+      setShowSizeModal(true);
+      return;
+    }
+
+    // Create cart item with size info if applicable
+    const cartItem = selectedSize
+      ? { ...item, selectedSize: selectedSize.name, price: selectedSize.price, displayName: `${item.name} (${selectedSize.name})` }
+      : item;
+
+    // Find existing item by id AND size (if applicable)
+    const existingItem = cartItems.find(i =>
+      i.id === item.id && (!selectedSize || i.selectedSize === selectedSize.name)
+    );
+
     if (existingItem) {
-      setCartItems(cartItems.map(i => 
-        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+      setCartItems(cartItems.map(i =>
+        (i.id === item.id && (!selectedSize || i.selectedSize === selectedSize.name))
+          ? { ...i, quantity: i.quantity + 1 }
+          : i
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1 }]);
+      setCartItems([...cartItems, { ...cartItem, quantity: 1 }]);
     }
+
+    // Close modal if it was open
+    setShowSizeModal(false);
+    setSelectedProduct(null);
   };
 
-  const removeFromCart = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+  const removeFromCart = (id, selectedSize = null) => {
+    setCartItems(cartItems.filter(item =>
+      !(item.id === id && (!selectedSize || item.selectedSize === selectedSize))
+    ));
   };
 
-  const updateQuantity = (id, newQuantity) => {
+  const updateQuantity = (id, newQuantity, selectedSize = null) => {
     if (newQuantity === 0) {
-      removeFromCart(id);
+      removeFromCart(id, selectedSize);
     } else {
-      setCartItems(cartItems.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
+      setCartItems(cartItems.map(item =>
+        (item.id === id && (!selectedSize || item.selectedSize === selectedSize))
+          ? { ...item, quantity: newQuantity }
+          : item
       ));
     }
   };
@@ -248,8 +279,64 @@ export default function RestaurantApp() {
         {currentPage === 'checkout' && <CheckoutPage setCurrentPage={setCurrentPage} />}
         {currentPage === 'confirmation' && <ConfirmationPage setCurrentPage={setCurrentPage} />}
         {showCart && <CartDrawer setShowCart={setShowCart} setCurrentPage={setCurrentPage} />}
+        {showSizeModal && selectedProduct && (
+          <SizeModal
+            product={selectedProduct}
+            onClose={() => {
+              console.log('Closing size modal');
+              setShowSizeModal(false);
+              setSelectedProduct(null);
+            }}
+            onSelectSize={(size) => {
+              console.log('Size selected:', size);
+              addToCart(selectedProduct, size);
+            }}
+          />
+        )}
       </div>
     </CartContext.Provider>
+  );
+}
+
+// Size Selection Modal
+function SizeModal({ product, onClose, onSelectSize }) {
+  console.log('SizeModal rendering with product:', product);
+
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      onClick={(e) => {
+        // Close when clicking backdrop
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative animate-fadeIn">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-all"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        <h2 className="text-2xl font-black text-green-600 mb-2">Select Size</h2>
+        <p className="text-gray-600 font-bold mb-6">{product.name}</p>
+
+        <div className="space-y-3">
+          {product.sizes.map((size) => (
+            <button
+              key={size.name}
+              onClick={() => onSelectSize(size)}
+              className="w-full bg-gray-50 hover:bg-green-50 border-2 border-gray-200 hover:border-green-600 rounded-lg p-4 flex items-center justify-between transition-all group"
+            >
+              <span className="font-bold text-gray-800 group-hover:text-green-600">{size.name}</span>
+              <span className="text-xl font-black text-green-600">Php {size.price.toFixed(2)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -405,17 +492,17 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
             >
               <div className="absolute inset-0 bg-black bg-opacity-50"></div>
               <div className="relative max-w-7xl mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
-                <h1 className="text-5xl md:text-7xl font-black mb-4 drop-shadow-lg animate-fadeIn">
+                <h1 className="text-3xl md:text-5xl font-black mb-4 drop-shadow-lg animate-fadeIn">
                   {slide.title}
                   <br />
                   <span className="text-yellow-300">{slide.subtitle}</span>
                 </h1>
-                <p className="text-xl md:text-2xl mb-8 text-white font-bold animate-fadeIn">
+                <p className="text-sm md:text-lg mb-8 text-white font-bold animate-fadeIn">
                   {slide.description}
                 </p>
                 <button
                   onClick={() => setCurrentPage('menu')}
-                  className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-lg font-black hover:bg-yellow-300 transition-all shadow-xl hover:shadow-2xl inline-flex items-center space-x-2 tracking-wider animate-fadeIn hover:scale-105"
+                  className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-sm font-black hover:bg-yellow-300 transition-all shadow-xl hover:shadow-2xl inline-flex items-center space-x-2 tracking-wider animate-fadeIn hover:scale-105"
                 >
                   <span>ORDER NOW</span>
                   <ChevronRight className="w-5 h-5" />
@@ -529,7 +616,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
               <div className="space-y-3 text-gray-700 text-sm">
                 <div className="flex items-start space-x-2">
                   <span>📍</span>
-                  <span>123 Food Street, Quezon City, NCR, Philippines</span>
+                  <span>Cantecson,Gairan,Bogo,Cebu,Philippines</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span>📞</span>
@@ -611,26 +698,32 @@ function PopularItemCard({ item }) {
 
   return (
     <div className="bg-gray-50 rounded-xl shadow-lg hover:shadow-2xl transition-all overflow-hidden group w-full h-96 flex flex-col">
-      <div className="bg-gray-50 p-8 text-center flex-1 flex flex-col justify-center">
+      <div className="bg-gray-50 p-4 text-center flex-1 flex flex-col justify-center">
         {item.image && item.image.startsWith('assets/') ? (
-          <img src={item.image} alt={item.name} className="object-contain mx-auto rounded-lg h-32 w-32 group-hover:scale-110 transition-transform bg-gray-50" />
+          <img src={item.image} alt={item.name} className="object-contain mx-auto rounded-lg h-48 w-48 group-hover:scale-110 transition-transform bg-gray-50" />
         ) : (
-          <div className="text-7xl group-hover:scale-110 transition-transform">{item.image}</div>
+          <div className="text-9xl group-hover:scale-110 transition-transform">{item.image}</div>
         )}
       </div>
       <div className="p-6 flex flex-col justify-between h-40">
         <div className="flex items-start justify-between mb-2">
-          <h3 className="text-xl font-black text-green-600">{item.name}</h3>
+          <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-600">{item.name}</h3>
           <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-black">POPULAR</span>
         </div>
-        <p className="text-gray-600 text-sm mb-4 font-semibold">{item.description}</p>
+        <p className="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2 font-normal">{item.description}</p>
         <div className="flex items-center justify-between">
-          <span className="text-3xl font-black text-red-600">Php {item.price.toFixed(2)}</span>
-          <button 
+          {item.sizes ? (
+            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600">
+              From Php {Math.min(...item.sizes.map(s => s.price)).toFixed(2)}
+            </span>
+          ) : (
+            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600">Php {item.price.toFixed(2)}</span>
+          )}
+          <button
             onClick={() => addToCart(item)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 font-black text-sm"
+            className="bg-green-600 text-white px-4 sm:px-5 py-3 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 font-bold text-sm hover:scale-105"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>ADD</span>
           </button>
         </div>
@@ -705,13 +798,13 @@ function MenuItem({ item }) {
   const { addToCart } = useCart();
 
   return (
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full flex flex-row h-auto min-h-[140px] sm:min-h-[150px]">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group w-full flex flex-row h-auto min-h-[273px] sm:min-h-[293px]">
         {/* Left side - Product Image */}
-        <div className="bg-gray-50 p-3 sm:p-4 flex items-center justify-center w-28 sm:w-32 md:w-36 flex-shrink-0 relative">
+        <div className="bg-gray-50 p-3 sm:p-4 flex items-center justify-center w-48 sm:w-54 md:w-60 flex-shrink-0 relative">
           {item.image && item.image.startsWith('assets/') ? (
-            <img src={item.image} alt={item.name} className="object-contain w-full h-28 sm:h-32 md:h-36 rounded-lg group-hover:scale-110 transition-transform duration-300" />
+            <img src={item.image} alt={item.name} className="object-contain w-full h-48 sm:h-54 md:h-60 rounded-lg group-hover:scale-110 transition-transform duration-300" />
           ) : (
-            <div className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">{item.image}</div>
+            <div className="text-7xl sm:text-8xl md:text-9xl group-hover:scale-110 transition-transform duration-300">{item.image}</div>
           )}
           {item.popular && (
             <span className="absolute top-1 right-1 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-black">
@@ -721,18 +814,24 @@ function MenuItem({ item }) {
       </div>
 
       {/* Right side - Product Details */}
-      <div className="p-3 sm:p-4 flex flex-col justify-between flex-1 min-w-0">
-        <div>
-          <h3 className="text-sm sm:text-base font-medium text-green-600 mb-1 truncate">{item.name}</h3>
-          <p className="text-gray-600 text-xs sm:text-xs mb-2 line-clamp-2 font-normal">{item.description}</p>
+      <div className="p-4 sm:p-5 md:p-6 flex flex-col justify-start flex-1 min-w-0">
+        <div className="mb-4">
+          <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-600 mb-2">{item.name}</h3>
+          <p className="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2 font-normal">{item.description}</p>
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
+        <div className="flex flex-col gap-2">
+          {item.sizes ? (
+            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600 whitespace-nowrap">
+              From Php {Math.min(...item.sizes.map(s => s.price)).toFixed(2)}
+            </span>
+          ) : (
+            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
+          )}
           <button
             onClick={() => addToCart(item)}
-            className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 text-xs font-medium flex-shrink-0 hover:scale-105"
+            className="bg-green-600 text-white px-4 sm:px-5 py-3 rounded-lg hover:bg-green-700 transition-all flex items-center justify-center space-x-1 text-sm font-bold hover:scale-105 w-full"
           >
-            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>ADD</span>
           </button>
         </div>
@@ -764,8 +863,8 @@ function CartDrawer({ setShowCart, setCurrentPage }) {
           ) : (
             <>
               <div className="space-y-4 mb-6">
-                {cartItems.map(item => (
-                  <CartItemCard key={item.id} item={item} />
+                {cartItems.map((item, index) => (
+                  <CartItemCard key={`${item.id}-${item.selectedSize || 'default'}-${index}`} item={item} />
                 ))}
               </div>
               <button 
@@ -817,8 +916,8 @@ function CartPage({ setCurrentPage }) {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="space-y-4 mb-6 bg-white bg-opacity-80 backdrop-blur-sm p-6 rounded-xl shadow-md">
-          {cartItems.map(item => (
-            <CartItemCard key={item.id} item={item} detailed />
+          {cartItems.map((item, index) => (
+            <CartItemCard key={`${item.id}-${item.selectedSize || 'default'}-${index}`} item={item} detailed />
           ))}
         </div>
 
@@ -874,26 +973,27 @@ function CartItemCard({ item, detailed = false }) {
       </div>
       <div className="flex-1">
         <h3 className="font-black text-green-600 text-sm">{item.name}</h3>
+        {item.selectedSize && <p className="text-gray-500 text-xs font-bold">Size: {item.selectedSize}</p>}
         <p className="text-green-600 font-black text-sm">Php {item.price.toFixed(2)}</p>
       </div>
       <div className="flex items-center space-x-3">
-        <button 
-          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+        <button
+          onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedSize)}
           className="bg-gray-200 hover:bg-gray-300 rounded-full p-2 transition-all"
         >
           <Minus className="w-4 h-4 text-red-600" />
         </button>
         <span className="font-black text-lg w-8 text-center">{item.quantity}</span>
-        <button 
-          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+        <button
+          onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedSize)}
           className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-all"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
       {detailed && (
-        <button 
-          onClick={() => removeFromCart(item.id)}
+        <button
+          onClick={() => removeFromCart(item.id, item.selectedSize)}
           className="text-green-600 hover:text-green-700 p-2 font-black"
         >
           <Trash2 className="w-5 h-5" />
@@ -931,7 +1031,7 @@ function CheckoutPage({ setCurrentPage }) {
 
       // Format cart items as a string
       const itemsList = cartItems.map(item =>
-        `${item.name} (x${item.quantity}) - Php ${(item.price * item.quantity).toFixed(2)}`
+        `${item.name}${item.selectedSize ? ` (${item.selectedSize})` : ''} (x${item.quantity}) - Php ${(item.price * item.quantity).toFixed(2)}`
       ).join(', ');
 
       // Send data to Google Sheets (uses GOOGLE_SCRIPT_URL from top of file)
