@@ -346,7 +346,7 @@ function Header({ currentPage, setCurrentPage, setShowCart, searchQuery, setSear
 
   return (
     <header className="bg-green-600 shadow-2xl sticky top-0 z-50 border-b-4 border-green-400">
-      <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="mx-auto px-4 py-3" style={{maxWidth: '1800px'}}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
             <div className="text-5xl font-black text-white drop-shadow-lg">K</div>
@@ -491,7 +491,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
               }}
             >
               <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-              <div className="relative max-w-7xl mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
+              <div className="relative mx-auto px-4 h-full flex flex-col justify-center items-center text-center" style={{maxWidth: '1800px'}}>
                 <h1 className="text-3xl md:text-5xl font-black mb-4 drop-shadow-lg animate-fadeIn">
                   {slide.title}
                   <br />
@@ -551,7 +551,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
 
       {/* Popular Items */}
       <section className="bg-gray-50 py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{maxWidth: '1800px'}}>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-green-600 mb-8 sm:mb-12 text-center drop-shadow-lg">⭐ POPULAR NOW</h2>
         {isLoading ? (
           <div className="text-center py-16">
@@ -580,7 +580,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
 
       {/* Features & Contact Info */}
       <section className="bg-gray-50 py-2">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{maxWidth: '1800px'}}>
           {/* Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center mb-16">
             <div className="bg-green-600 p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
@@ -744,7 +744,7 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
     <div className="bg-gray-50 min-h-screen">
       {/* Category Filter - Right below header */}
       <div className="bg-white shadow-md sticky top-[73px] z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{maxWidth: '1800px'}}>
           <div className="flex overflow-x-auto space-x-1 py-3 scrollbar-hide">
             {categories.map(category => (
               <button
@@ -764,7 +764,7 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
       </div>
 
       {/* Menu Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" style={{maxWidth: '1800px'}}>
         <h1 className="text-2xl sm:text-3xl font-semibold text-green-600 mb-6 sm:mb-8 text-center">OUR MENU</h1>
 
         {isLoading ? (
@@ -894,7 +894,7 @@ function CartPage({ setCurrentPage }) {
   if (cartItems.length === 0) {
     return (
       <div className="bg-gray-50 min-h-screen py-16">
-        <div className="max-w-7xl mx-auto px-4 text-center">
+        <div className="mx-auto px-4 text-center" style={{maxWidth: '1800px'}}>
         <ShoppingCart className="w-24 h-24 text-red-300 mx-auto mb-4" />
         <h2 className="text-3xl font-black text-red-600 mb-4">YOUR CART IS EMPTY</h2>
         <p className="text-gray-600 mb-8 font-bold text-lg">Add some delicious items to get started!</p>
@@ -911,7 +911,7 @@ function CartPage({ setCurrentPage }) {
 
   return (
     <div className="bg-gray-50 min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="mx-auto px-4" style={{maxWidth: '1800px'}}>
       <h1 className="text-5xl font-black text-green-600 mb-12 text-center">🛒 YOUR CART</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1094,7 +1094,7 @@ function CheckoutPage({ setCurrentPage }) {
 
   return (
     <div className="bg-gray-50 min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="mx-auto px-4" style={{maxWidth: '1800px'}}>
       <h1 className="text-5xl font-black text-green-600 mb-12 text-center">💳 CHECKOUT</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1330,7 +1330,7 @@ function CheckoutPage({ setCurrentPage }) {
 function ConfirmationPage({ setCurrentPage }) {
   return (
     <div className="bg-gray-50 min-h-screen py-16">
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="mx-auto px-4" style={{maxWidth: '1800px'}}>
       <div className="text-center mb-8 mt-8">
         <div className="text-4xl mb-3">✅</div>
         <h1 className="text-3xl font-bold text-green-600 mb-2">ORDER CONFIRMED!</h1>
