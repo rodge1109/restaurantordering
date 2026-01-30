@@ -11,7 +11,7 @@ const useCart = () => {
 };
 
 // Google Sheets API URL - UPDATE THIS WITH YOUR WEB APP URL
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYH_e2AeORBFguaq3VrrbdpWXJfXYgNM-gGS3R4mgzVjI6tMAwwzZbPRCE-GgjgbAZ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym6702IouGsIS_BM_ZFMbUI28L7jOwvUsBOzRKPBCgPS5mfnCSCQSS9SWorxPa6Im9/exec';
 
 // Fallback Menu Data (used if Google Sheets fetch fails)
 const fallbackMenuData = [
@@ -708,20 +708,20 @@ function PopularItemCard({ item }) {
       <div className="p-6 flex flex-col justify-between h-40">
         <div className="flex items-start justify-between mb-2">
           <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-600">{item.name}</h3>
-          <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-black">POPULAR</span>
+          <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-black whitespace-nowrap">POPULAR</span>
         </div>
         <p className="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2 font-normal">{item.description}</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           {item.sizes ? (
-            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600">
+            <span className="text-sm sm:text-base md:text-lg font-semibold text-green-600 whitespace-nowrap flex-shrink-0">
               From Php {Math.min(...item.sizes.map(s => s.price)).toFixed(2)}
             </span>
           ) : (
-            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600">Php {item.price.toFixed(2)}</span>
+            <span className="text-sm sm:text-base md:text-lg font-semibold text-green-600 whitespace-nowrap flex-shrink-0">Php {item.price.toFixed(2)}</span>
           )}
           <button
             onClick={() => addToCart(item)}
-            className="bg-green-600 text-white px-4 sm:px-5 py-3 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 font-bold text-sm hover:scale-105"
+            className="bg-green-600 text-white px-4 sm:px-5 py-3 rounded-lg hover:bg-green-700 transition-all flex items-center space-x-1 font-bold text-sm hover:scale-105 whitespace-nowrap flex-shrink-0"
           >
             <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>ADD</span>
@@ -816,20 +816,20 @@ function MenuItem({ item }) {
       {/* Right side - Product Details */}
       <div className="p-4 sm:p-5 md:p-6 flex flex-col justify-start flex-1 min-w-0">
         <div className="mb-4">
-          <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-600 mb-2">{item.name}</h3>
+          <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-600 mb-2 break-words">{item.name}</h3>
           <p className="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2 font-normal">{item.description}</p>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 mt-auto">
           {item.sizes ? (
-            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600 whitespace-nowrap">
+            <span className="text-sm sm:text-base md:text-lg font-semibold text-green-600 break-words">
               From Php {Math.min(...item.sizes.map(s => s.price)).toFixed(2)}
             </span>
           ) : (
-            <span className="text-base sm:text-lg md:text-xl font-semibold text-green-600 whitespace-nowrap">Php {item.price.toFixed(2)}</span>
+            <span className="text-sm sm:text-base md:text-lg font-semibold text-green-600 break-words">Php {item.price.toFixed(2)}</span>
           )}
           <button
             onClick={() => addToCart(item)}
-            className="bg-green-600 text-white px-4 sm:px-5 py-3 rounded-lg hover:bg-green-700 transition-all flex items-center justify-center space-x-1 text-sm font-bold hover:scale-105 w-full"
+            className="bg-green-600 text-white px-4 sm:px-5 py-3 rounded-lg hover:bg-green-700 transition-all flex items-center justify-center space-x-1 text-sm font-bold hover:scale-105 w-full whitespace-nowrap"
           >
             <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>ADD</span>
@@ -1013,12 +1013,20 @@ function CheckoutPage({ setCurrentPage }) {
     address: '',
     city: '',
     zipCode: '',
-    paymentMethod: 'credit'
+    paymentMethod: 'cash',
+    paymentReference: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate payment reference for GCash and Bank Transfer
+    if ((formData.paymentMethod === 'gcash' || formData.paymentMethod === 'bank') && !formData.paymentReference.trim()) {
+      alert(`Please enter the ${formData.paymentMethod === 'gcash' ? 'GCash' : 'Bank'} reference number.`);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -1033,6 +1041,16 @@ function CheckoutPage({ setCurrentPage }) {
       const itemsList = cartItems.map(item =>
         `${item.name}${item.selectedSize ? ` (${item.selectedSize})` : ''} (x${item.quantity}) - Php ${(item.price * item.quantity).toFixed(2)}`
       ).join(', ');
+
+      // Format payment method display
+      let paymentMethodDisplay = formData.paymentMethod;
+      if (formData.paymentMethod === 'cash') {
+        paymentMethodDisplay = 'Cash on Delivery';
+      } else if (formData.paymentMethod === 'gcash') {
+        paymentMethodDisplay = `GCash (Ref: ${formData.paymentReference})`;
+      } else if (formData.paymentMethod === 'bank') {
+        paymentMethodDisplay = `Bank Transfer (Ref: ${formData.paymentReference})`;
+      }
 
       // Send data to Google Sheets (uses GOOGLE_SCRIPT_URL from top of file)
       const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -1050,7 +1068,8 @@ function CheckoutPage({ setCurrentPage }) {
           address: formData.address,
           city: formData.city,
           barangay: formData.zipCode,
-          paymentMethod: formData.paymentMethod,
+          paymentMethod: paymentMethodDisplay,
+          paymentReference: formData.paymentReference || 'N/A',
           items: itemsList,
           subtotal: getTotalPrice().toFixed(2),
           deliveryFee: deliveryFee.toFixed(2),
@@ -1138,40 +1157,23 @@ function CheckoutPage({ setCurrentPage }) {
             <div>
               <h3 className="text-xl font-black text-green-600 mb-4">💰 PAYMENT METHOD</h3>
               <div className="space-y-3">
-                <label className="flex items-center space-x-3 p-4 border-2 border-green-600 rounded-lg cursor-pointer hover:bg-green-50 transition-all">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="credit"
-                    checked={formData.paymentMethod === 'credit'}
-                    onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                    className="w-5 h-5 text-green-600"
-                  />
-                  <span className="font-black text-green-600">💳 Credit/Debit Card</span>
-                </label>
-                <label className="flex items-center space-x-3 p-4 border-2 border-green-600 rounded-lg cursor-pointer hover:bg-green-50 transition-all">
+                <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  formData.paymentMethod === 'cash' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:bg-green-50'
+                }`}>
                   <input
                     type="radio"
                     name="payment"
                     value="cash"
                     checked={formData.paymentMethod === 'cash'}
-                    onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+                    onChange={(e) => setFormData({...formData, paymentMethod: e.target.value, paymentReference: ''})}
                     className="w-5 h-5 text-green-600"
                   />
                   <span className="font-black text-green-600">💵 Cash on Delivery</span>
                 </label>
-                <label className="flex items-center space-x-3 p-4 border-2 border-green-600 rounded-lg cursor-pointer hover:bg-green-50 transition-all">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="paypal"
-                    checked={formData.paymentMethod === 'paypal'}
-                    onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                    className="w-5 h-5 text-green-600"
-                  />
-                  <span className="font-black text-green-600">🅿️ PayPal</span>
-                </label>
-                <label className="flex items-center space-x-3 p-4 border-2 border-green-600 rounded-lg cursor-pointer hover:bg-green-50 transition-all">
+
+                <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  formData.paymentMethod === 'gcash' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:bg-green-50'
+                }`}>
                   <input
                     type="radio"
                     name="payment"
@@ -1182,7 +1184,98 @@ function CheckoutPage({ setCurrentPage }) {
                   />
                   <span className="font-black text-green-600">📱 GCash</span>
                 </label>
+
+                <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  formData.paymentMethod === 'bank' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:bg-green-50'
+                }`}>
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="bank"
+                    checked={formData.paymentMethod === 'bank'}
+                    onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+                    className="w-5 h-5 text-green-600"
+                  />
+                  <span className="font-black text-green-600">🏦 Bank Transfer</span>
+                </label>
               </div>
+
+              {/* Payment Instructions */}
+              {formData.paymentMethod === 'cash' && (
+                <div className="mt-4 bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                  <h4 className="font-black text-blue-700 mb-2">📋 Cash on Delivery Instructions</h4>
+                  <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                    <li>Prepare exact amount if possible</li>
+                    <li>Payment will be collected upon delivery</li>
+                    <li>Please have your order number ready</li>
+                  </ul>
+                </div>
+              )}
+
+              {formData.paymentMethod === 'gcash' && (
+                <div className="mt-4 bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                  <h4 className="font-black text-green-700 mb-3">📱 GCash Payment Instructions</h4>
+                  <div className="space-y-3">
+                    <div className="bg-white rounded-lg p-3 border border-green-200">
+                      <p className="text-sm font-bold text-gray-700 mb-1">Send payment to:</p>
+                      <p className="text-lg font-black text-green-600">0912 345 6789</p>
+                      <p className="text-sm font-bold text-gray-600">Name: Kuchefnero Restaurant</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-green-200">
+                      <p className="text-sm font-bold text-gray-700 mb-1">Amount to send:</p>
+                      <p className="text-xl font-black text-green-600">Php {(getTotalPrice() + 4.99 + getTotalPrice() * 0.08).toFixed(2)}</p>
+                    </div>
+                    <div className="text-sm text-green-700 space-y-1">
+                      <p className="font-bold">After payment:</p>
+                      <ol className="list-decimal list-inside space-y-1 ml-2">
+                        <li>Take a screenshot of the payment confirmation</li>
+                        <li>Note the reference number below</li>
+                        <li>Send screenshot to our Facebook page or Viber</li>
+                      </ol>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Enter GCash Reference Number"
+                      value={formData.paymentReference}
+                      onChange={(e) => setFormData({...formData, paymentReference: e.target.value})}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-green-600 focus:border-green-700 focus:outline-none font-semibold"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formData.paymentMethod === 'bank' && (
+                <div className="mt-4 bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                  <h4 className="font-black text-blue-700 mb-3">🏦 Bank Transfer Instructions</h4>
+                  <div className="space-y-3">
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <p className="text-sm font-bold text-gray-700 mb-2">Transfer to:</p>
+                      <p className="text-sm font-bold text-gray-800">Bank: BDO</p>
+                      <p className="text-sm font-bold text-gray-800">Account Name: Kuchefnero Restaurant</p>
+                      <p className="text-lg font-black text-blue-600">Account #: 1234-5678-9012</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <p className="text-sm font-bold text-gray-700 mb-1">Amount to transfer:</p>
+                      <p className="text-xl font-black text-blue-600">Php {(getTotalPrice() + 4.99 + getTotalPrice() * 0.08).toFixed(2)}</p>
+                    </div>
+                    <div className="text-sm text-blue-700 space-y-1">
+                      <p className="font-bold">After transfer:</p>
+                      <ol className="list-decimal list-inside space-y-1 ml-2">
+                        <li>Keep your bank receipt/confirmation</li>
+                        <li>Enter the reference number below</li>
+                        <li>Send photo of receipt to our contact number</li>
+                      </ol>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Enter Bank Reference Number"
+                      value={formData.paymentReference}
+                      onChange={(e) => setFormData({...formData, paymentReference: e.target.value})}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-blue-600 focus:border-blue-700 focus:outline-none font-semibold"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <button 
@@ -1222,11 +1315,8 @@ function CheckoutPage({ setCurrentPage }) {
                 </div>
               </div>
             </div>
-            <div className="bg-green-100 border-2 border-green-400 rounded-lg p-4">
-              <div className="flex items-center space-x-2 text-red-600 font-black">
-                <Check className="w-5 h-5" />
-                <span>Free delivery on orders over Php 30</span>
-              </div>
+            <div className="pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 text-center">✓ Free delivery on orders over Php 30</p>
             </div>
           </div>
         </div>
@@ -1241,10 +1331,10 @@ function ConfirmationPage({ setCurrentPage }) {
   return (
     <div className="bg-gray-50 min-h-screen py-16">
       <div className="max-w-2xl mx-auto px-4">
-      <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl p-12 text-center mb-8 shadow-2xl mt-8">
-        <div className="text-6xl mb-4 animate-bounce">✅</div>
-        <h1 className="text-5xl font-black text-white mb-4">ORDER CONFIRMED!</h1>
-        <p className="text-white text-xl font-black">Thank you for your order. Your delicious food is on the way!</p>
+      <div className="text-center mb-8 mt-8">
+        <div className="text-4xl mb-3">✅</div>
+        <h1 className="text-3xl font-bold text-green-600 mb-2">ORDER CONFIRMED!</h1>
+        <p className="text-gray-600 text-base">Thank you for your order. Your delicious food is on the way!</p>
       </div>
 
       <div className="bg-green-600 rounded-xl p-6 mb-8 shadow-lg">
@@ -1252,43 +1342,72 @@ function ConfirmationPage({ setCurrentPage }) {
         <div className="text-3xl font-black text-white">#MD{Math.floor(Math.random() * 10000).toString().padStart(5, '0')}</div>
       </div>
 
-      <div className="space-y-4 mb-8 text-left">
-        <div className="flex items-center space-x-4 p-4 bg-green-300 rounded-lg border-2 border-green-400">
-          <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-2xl text-white font-black">
-            ✓
-          </div>
-          <div>
-            <div className="font-black text-green-700">ORDER RECEIVED</div>
-            <div className="text-sm text-green-700 font-bold">We've received your order</div>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4 p-4 bg-green-200 rounded-lg border-2 border-green-300">
-          <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-2xl text-white font-black">
-            👨‍🍳
-          </div>
-          <div>
-            <div className="font-black text-green-700">PREPARING</div>
-            <div className="text-sm text-green-700 font-bold">Your food is being prepared</div>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4 p-4 bg-green-100 rounded-lg border-2 border-green-200">
-          <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-2xl text-white font-black">
-            🚗
-          </div>
-          <div>
-            <div className="font-black text-green-700">ON THE WAY</div>
-            <div className="text-sm text-green-700 font-bold">Estimated time: 25-30 mins</div>
+      {/* Timeline */}
+      <div className="bg-white rounded-xl p-6 sm:p-8 mb-8 shadow-lg">
+        <h3 className="text-xl font-black text-green-600 mb-8 text-center">ORDER TIMELINE</h3>
+        <div className="relative">
+          {/* Timeline Line */}
+          <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-green-600 via-green-400 to-gray-300"></div>
+
+          {/* Timeline Items */}
+          <div className="space-y-8 relative">
+            {/* Order Received - Completed */}
+            <div className="flex items-start space-x-4 relative">
+              <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-lg z-10 ring-4 ring-green-100">
+                ✓
+              </div>
+              <div className="flex-1 pt-2">
+                <div className="font-black text-green-600 text-lg">ORDER RECEIVED</div>
+                <div className="text-sm text-gray-600 font-bold mt-1">We've received your order</div>
+                <div className="text-xs text-green-600 font-bold mt-1">✓ Completed</div>
+              </div>
+            </div>
+
+            {/* Preparing - In Progress */}
+            <div className="flex items-start space-x-4 relative">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-lg z-10 ring-4 ring-green-100 animate-pulse">
+                👨‍🍳
+              </div>
+              <div className="flex-1 pt-2">
+                <div className="font-black text-green-600 text-lg">PREPARING</div>
+                <div className="text-sm text-gray-600 font-bold mt-1">Your food is being prepared with care</div>
+                <div className="text-xs text-green-500 font-bold mt-1">⏳ In Progress</div>
+              </div>
+            </div>
+
+            {/* Out for Delivery - Pending */}
+            <div className="flex items-start space-x-4 relative">
+              <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-md z-10 ring-4 ring-gray-100">
+                🚗
+              </div>
+              <div className="flex-1 pt-2">
+                <div className="font-black text-gray-500 text-lg">OUT FOR DELIVERY</div>
+                <div className="text-sm text-gray-500 font-bold mt-1">Your order will be on the way soon</div>
+                <div className="text-xs text-gray-400 font-bold mt-1">⏱️ Pending</div>
+              </div>
+            </div>
+
+            {/* Delivered - Pending */}
+            <div className="flex items-start space-x-4 relative">
+              <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-md z-10 ring-4 ring-gray-100">
+                🎉
+              </div>
+              <div className="flex-1 pt-2">
+                <div className="font-black text-gray-500 text-lg">DELIVERED</div>
+                <div className="text-sm text-gray-500 font-bold mt-1">Estimated time: 25-30 mins</div>
+                <div className="text-xs text-gray-400 font-bold mt-1">⏱️ Pending</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-blue-100 border-2 border-blue-600 rounded-lg p-4 mb-8">
-        <div className="text-sm text-blue-700 font-black mb-2">📱 TRACK YOUR ORDER</div>
-        <p className="text-sm text-blue-700 font-bold">You will receive a text message with delivery updates</p>
+      <div className="text-center mb-8 py-4 border-t border-gray-200">
+        <p className="text-sm text-gray-600">📱 You will receive a text message with delivery updates</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <button 
+        <button
           onClick={() => setCurrentPage('home')}
           className="flex-1 bg-green-600 text-white py-3 rounded-lg font-black hover:bg-green-700 transition-all text-lg tracking-wider"
         >
