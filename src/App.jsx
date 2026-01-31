@@ -346,7 +346,7 @@ function Header({ currentPage, setCurrentPage, setShowCart, searchQuery, setSear
 
   return (
     <header className="bg-green-600 shadow-2xl sticky top-0 z-50 border-b-4 border-green-400">
-      <div className="mx-auto px-4 py-3" style={{maxWidth: '1800px'}}>
+      <div className="w-full px-8 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
             <div className="text-5xl font-black text-white drop-shadow-lg">K</div>
@@ -491,7 +491,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
               }}
             >
               <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-              <div className="relative mx-auto px-4 h-full flex flex-col justify-center items-center text-center" style={{maxWidth: '1800px'}}>
+              <div className="relative w-full px-8 h-full flex flex-col justify-center items-center text-center" >
                 <h1 className="text-3xl md:text-5xl font-black mb-4 drop-shadow-lg animate-fadeIn">
                   {slide.title}
                   <br />
@@ -551,7 +551,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
 
       {/* Popular Items */}
       <section className="bg-gray-50 py-12 sm:py-16">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{maxWidth: '1800px'}}>
+        <div className="w-full px-8">
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-green-600 mb-8 sm:mb-12 text-center drop-shadow-lg">⭐ POPULAR NOW</h2>
         {isLoading ? (
           <div className="text-center py-16">
@@ -580,7 +580,7 @@ function HomePage({ setCurrentPage, menuData, isLoading }) {
 
       {/* Features & Contact Info */}
       <section className="bg-gray-50 py-2">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{maxWidth: '1800px'}}>
+        <div className="w-full px-8">
           {/* Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center mb-16">
             <div className="bg-green-600 p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
@@ -744,7 +744,7 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
     <div className="bg-gray-50 min-h-screen">
       {/* Category Filter - Right below header */}
       <div className="bg-white shadow-md sticky top-[73px] z-40">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{maxWidth: '1800px'}}>
+        <div className="w-full px-8">
           <div className="flex overflow-x-auto space-x-1 py-3 scrollbar-hide">
             {categories.map(category => (
               <button
@@ -764,7 +764,7 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
       </div>
 
       {/* Menu Content */}
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" style={{maxWidth: '1800px'}}>
+      <div className="w-full px-8 py-6 sm:py-8">
         <h1 className="text-2xl sm:text-3xl font-semibold text-green-600 mb-6 sm:mb-8 text-center">OUR MENU</h1>
 
         {isLoading ? (
@@ -893,66 +893,66 @@ function CartPage({ setCurrentPage }) {
 
   if (cartItems.length === 0) {
     return (
-      <div className="bg-gray-50 min-h-screen py-16">
-        <div className="mx-auto px-4 text-center" style={{maxWidth: '1800px'}}>
-        <ShoppingCart className="w-24 h-24 text-red-300 mx-auto mb-4" />
-        <h2 className="text-3xl font-black text-red-600 mb-4">YOUR CART IS EMPTY</h2>
-        <p className="text-gray-600 mb-8 font-bold text-lg">Add some delicious items to get started!</p>
-        <button
-          onClick={() => setCurrentPage('menu')}
-          className="bg-red-600 text-white px-8 py-3 rounded-lg font-black hover:bg-red-700 transition-all text-lg tracking-wider"
-        >
-          BROWSE MENU
-        </button>
+      <div className="bg-gray-50 min-h-screen py-8">
+        <div className="w-full px-8 text-center">
+          <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h2 className="text-xl font-medium text-gray-800 mb-2">Your cart is empty</h2>
+          <p className="text-sm text-gray-500 mb-6">Add some items to get started</p>
+          <button
+            onClick={() => setCurrentPage('menu')}
+            className="bg-green-600 text-white px-6 py-2.5 rounded-md text-sm font-medium hover:bg-green-700 transition-all"
+          >
+            Browse Menu
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-16">
-      <div className="mx-auto px-4" style={{maxWidth: '1800px'}}>
-      <h1 className="text-5xl font-black text-green-600 mb-12 text-center">🛒 YOUR CART</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="space-y-4 mb-6 bg-white bg-opacity-80 backdrop-blur-sm p-6 rounded-xl shadow-md">
-          {cartItems.map((item, index) => (
-            <CartItemCard key={`${item.id}-${item.selectedSize || 'default'}-${index}`} item={item} detailed />
-          ))}
-        </div>
+    <div className="bg-gray-50 min-h-screen py-8">
+      <div className="w-full px-8">
+        <h1 className="text-2xl font-medium text-gray-800 mb-8 text-center">Your Cart</h1>
 
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24 border-t-4 border-green-600">
-            <h3 className="text-2xl font-black text-red-600 mb-6">ORDER SUMMARY</h3>
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between text-gray-600">
-                <span>Subtotal</span>
-                <span>Php {getTotalPrice().toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Delivery Fee</span>
-                <span>Php {deliveryFee.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Tax (8%)</span>
-                <span>Php {tax.toFixed(2)}</span>
-              </div>
-              <div className="border-t-2 border-gray-200 pt-3">
-                <div className="flex justify-between text-xl font-bold">
-                  <span>Total</span>
-                  <span className="text-orange-600">Php {total.toFixed(2)}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-3">
+            {cartItems.map((item, index) => (
+              <CartItemCard key={`${item.id}-${item.selectedSize || 'default'}-${index}`} item={item} detailed />
+            ))}
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm p-5 sticky top-24">
+              <h3 className="text-base font-medium text-gray-800 mb-4">Order Summary</h3>
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Subtotal</span>
+                  <span>Php {getTotalPrice().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Delivery Fee</span>
+                  <span>Php {deliveryFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Tax (8%)</span>
+                  <span>Php {tax.toFixed(2)}</span>
+                </div>
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <div className="flex justify-between text-base font-medium">
+                    <span>Total</span>
+                    <span className="text-green-600">Php {total.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => setCurrentPage('checkout')}
+                className="w-full bg-green-600 text-white py-2.5 rounded-md text-sm font-medium hover:bg-green-700 transition-all"
+              >
+                Proceed to Checkout
+              </button>
             </div>
-            <button
-              onClick={() => setCurrentPage('checkout')}
-              className="w-full bg-green-600 text-white py-4 rounded-full font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl"
-            >
-              Proceed to Checkout
-            </button>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
@@ -963,40 +963,40 @@ function CartItemCard({ item, detailed = false }) {
   const { updateQuantity, removeFromCart } = useCart();
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
-      <div className="bg-white rounded-lg p-3 flex items-center justify-center w-20 h-20">
+    <div className="bg-white rounded-lg shadow-sm p-4 flex items-center gap-4">
+      <div className="bg-gray-50 rounded-md flex items-center justify-center w-16 h-16">
         {item.image && item.image.startsWith('assets/') ? (
           <img src={item.image} alt={item.name} className="object-contain w-full h-full rounded" />
         ) : (
-          <div className="text-4xl">{item.image}</div>
+          <div className="text-3xl">{item.image}</div>
         )}
       </div>
       <div className="flex-1">
-        <h3 className="font-black text-green-600 text-sm">{item.name}</h3>
-        {item.selectedSize && <p className="text-gray-500 text-xs font-bold">Size: {item.selectedSize}</p>}
-        <p className="text-green-600 font-black text-sm">Php {item.price.toFixed(2)}</p>
+        <h3 className="font-medium text-gray-800 text-sm">{item.name}</h3>
+        {item.selectedSize && <p className="text-gray-400 text-xs">Size: {item.selectedSize}</p>}
+        <p className="text-green-600 font-medium text-sm">Php {item.price.toFixed(2)}</p>
       </div>
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center gap-2">
         <button
           onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedSize)}
-          className="bg-gray-200 hover:bg-gray-300 rounded-full p-2 transition-all"
+          className="bg-gray-100 hover:bg-gray-200 rounded-md p-1.5 transition-all"
         >
-          <Minus className="w-4 h-4 text-red-600" />
+          <Minus className="w-3 h-3 text-gray-600" />
         </button>
-        <span className="font-black text-lg w-8 text-center">{item.quantity}</span>
+        <span className="font-medium text-sm w-6 text-center">{item.quantity}</span>
         <button
           onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedSize)}
-          className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-all"
+          className="bg-green-600 hover:bg-green-700 text-white rounded-md p-1.5 transition-all"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3 h-3" />
         </button>
       </div>
       {detailed && (
         <button
           onClick={() => removeFromCart(item.id, item.selectedSize)}
-          className="text-green-600 hover:text-green-700 p-2 font-black"
+          className="text-gray-400 hover:text-red-500 p-1 transition-all"
         >
-          <Trash2 className="w-5 h-5" />
+          <Trash2 className="w-4 h-4" />
         </button>
       )}
     </div>
@@ -1093,23 +1093,23 @@ function CheckoutPage({ setCurrentPage }) {
   const total = getTotalPrice() + deliveryFee + tax;
 
   return (
-    <div className="bg-gray-50 min-h-screen py-16">
-      <div className="mx-auto px-4" style={{maxWidth: '1800px'}}>
-      <h1 className="text-5xl font-black text-green-600 mb-12 text-center">💳 CHECKOUT</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="bg-white bg-opacity-95 rounded-xl shadow-lg p-6 space-y-6 border-t-4 border-green-600">
+    <div className="bg-gray-50 min-h-screen py-8">
+      <div className="w-full px-8">
+        <h1 className="text-2xl font-medium text-gray-800 mb-8 text-center">Checkout</h1>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
             <div>
-              <h3 className="text-xl font-black text-green-600 mb-4">📍 DELIVERY ADDRESS</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h3 className="text-base font-medium text-gray-700 mb-4">Delivery Address</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
                   type="text"
                   placeholder="Full Name"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-red-600 focus:border-red-700 focus:outline-none font-semibold"
+                  className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm"
                 />
                 <input
                   type="email"
@@ -1117,7 +1117,7 @@ function CheckoutPage({ setCurrentPage }) {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-red-600 focus:border-red-700 focus:outline-none font-semibold"
+                  className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm"
                 />
                 <input
                   type="tel"
@@ -1125,7 +1125,7 @@ function CheckoutPage({ setCurrentPage }) {
                   required
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-red-600 focus:border-red-700 focus:outline-none font-semibold"
+                  className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm"
                 />
                 <input
                   type="text"
@@ -1133,7 +1133,7 @@ function CheckoutPage({ setCurrentPage }) {
                   required
                   value={formData.zipCode}
                   onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-red-600 focus:border-red-700 focus:outline-none font-semibold"
+                  className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm"
                 />
               </div>
               <input
@@ -1142,7 +1142,7 @@ function CheckoutPage({ setCurrentPage }) {
                 required
                 value={formData.address}
                 onChange={(e) => setFormData({...formData, address: e.target.value})}
-                className="w-full px-4 py-3 rounded-lg border-2 border-red-600 focus:border-red-700 focus:outline-none font-semibold mt-4"
+                className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm mt-3"
               />
               <input
                 type="text"
@@ -1150,15 +1150,15 @@ function CheckoutPage({ setCurrentPage }) {
                 required
                 value={formData.city}
                 onChange={(e) => setFormData({...formData, city: e.target.value})}
-                className="w-full px-4 py-3 rounded-lg border-2 border-red-600 focus:border-red-700 focus:outline-none font-semibold mt-4"
+                className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm mt-3"
               />
             </div>
 
             <div>
-              <h3 className="text-xl font-black text-green-600 mb-4">💰 PAYMENT METHOD</h3>
-              <div className="space-y-3">
-                <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  formData.paymentMethod === 'cash' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:bg-green-50'
+              <h3 className="text-base font-medium text-gray-700 mb-4">Payment Method</h3>
+              <div className="space-y-2">
+                <label className={`flex items-center space-x-3 p-3 border rounded-md cursor-pointer transition-all ${
+                  formData.paymentMethod === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'
                 }`}>
                   <input
                     type="radio"
@@ -1166,13 +1166,13 @@ function CheckoutPage({ setCurrentPage }) {
                     value="cash"
                     checked={formData.paymentMethod === 'cash'}
                     onChange={(e) => setFormData({...formData, paymentMethod: e.target.value, paymentReference: ''})}
-                    className="w-5 h-5 text-green-600"
+                    className="w-4 h-4 text-green-600"
                   />
-                  <span className="font-black text-green-600">💵 Cash on Delivery</span>
+                  <span className="text-sm text-gray-700">Cash on Delivery</span>
                 </label>
 
-                <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  formData.paymentMethod === 'gcash' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:bg-green-50'
+                <label className={`flex items-center space-x-3 p-3 border rounded-md cursor-pointer transition-all ${
+                  formData.paymentMethod === 'gcash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'
                 }`}>
                   <input
                     type="radio"
@@ -1180,13 +1180,13 @@ function CheckoutPage({ setCurrentPage }) {
                     value="gcash"
                     checked={formData.paymentMethod === 'gcash'}
                     onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                    className="w-5 h-5 text-green-600"
+                    className="w-4 h-4 text-green-600"
                   />
-                  <span className="font-black text-green-600">📱 GCash</span>
+                  <span className="text-sm text-gray-700">GCash</span>
                 </label>
 
-                <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  formData.paymentMethod === 'bank' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:bg-green-50'
+                <label className={`flex items-center space-x-3 p-3 border rounded-md cursor-pointer transition-all ${
+                  formData.paymentMethod === 'bank' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'
                 }`}>
                   <input
                     type="radio"
@@ -1194,17 +1194,17 @@ function CheckoutPage({ setCurrentPage }) {
                     value="bank"
                     checked={formData.paymentMethod === 'bank'}
                     onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                    className="w-5 h-5 text-green-600"
+                    className="w-4 h-4 text-green-600"
                   />
-                  <span className="font-black text-green-600">🏦 Bank Transfer</span>
+                  <span className="text-sm text-gray-700">Bank Transfer</span>
                 </label>
               </div>
 
               {/* Payment Instructions */}
               {formData.paymentMethod === 'cash' && (
-                <div className="mt-4 bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-                  <h4 className="font-black text-blue-700 mb-2">📋 Cash on Delivery Instructions</h4>
-                  <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
+                  <h4 className="font-medium text-gray-700 text-sm mb-2">Cash on Delivery Instructions</h4>
+                  <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
                     <li>Prepare exact amount if possible</li>
                     <li>Payment will be collected upon delivery</li>
                     <li>Please have your order number ready</li>
@@ -1213,20 +1213,20 @@ function CheckoutPage({ setCurrentPage }) {
               )}
 
               {formData.paymentMethod === 'gcash' && (
-                <div className="mt-4 bg-green-50 border-2 border-green-300 rounded-lg p-4">
-                  <h4 className="font-black text-green-700 mb-3">📱 GCash Payment Instructions</h4>
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
+                  <h4 className="font-medium text-gray-700 text-sm mb-3">GCash Payment Instructions</h4>
                   <div className="space-y-3">
-                    <div className="bg-white rounded-lg p-3 border border-green-200">
-                      <p className="text-sm font-bold text-gray-700 mb-1">Send payment to:</p>
-                      <p className="text-lg font-black text-green-600">0912 345 6789</p>
-                      <p className="text-sm font-bold text-gray-600">Name: Kuchefnero Restaurant</p>
+                    <div className="bg-white rounded-md p-3 border border-green-100">
+                      <p className="text-xs text-gray-500 mb-1">Send payment to:</p>
+                      <p className="text-base font-medium text-gray-800">0912 345 6789</p>
+                      <p className="text-xs text-gray-500">Name: Kuchefnero Restaurant</p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 border border-green-200">
-                      <p className="text-sm font-bold text-gray-700 mb-1">Amount to send:</p>
-                      <p className="text-xl font-black text-green-600">Php {(getTotalPrice() + 4.99 + getTotalPrice() * 0.08).toFixed(2)}</p>
+                    <div className="bg-white rounded-md p-3 border border-green-100">
+                      <p className="text-xs text-gray-500 mb-1">Amount to send:</p>
+                      <p className="text-lg font-medium text-green-600">Php {(getTotalPrice() + 4.99 + getTotalPrice() * 0.08).toFixed(2)}</p>
                     </div>
-                    <div className="text-sm text-green-700 space-y-1">
-                      <p className="font-bold">After payment:</p>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p className="font-medium">After payment:</p>
                       <ol className="list-decimal list-inside space-y-1 ml-2">
                         <li>Take a screenshot of the payment confirmation</li>
                         <li>Note the reference number below</li>
@@ -1238,28 +1238,28 @@ function CheckoutPage({ setCurrentPage }) {
                       placeholder="Enter GCash Reference Number"
                       value={formData.paymentReference}
                       onChange={(e) => setFormData({...formData, paymentReference: e.target.value})}
-                      className="w-full px-4 py-3 rounded-lg border-2 border-green-600 focus:border-green-700 focus:outline-none font-semibold"
+                      className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm"
                     />
                   </div>
                 </div>
               )}
 
               {formData.paymentMethod === 'bank' && (
-                <div className="mt-4 bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-                  <h4 className="font-black text-blue-700 mb-3">🏦 Bank Transfer Instructions</h4>
+                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <h4 className="font-medium text-gray-700 text-sm mb-3">Bank Transfer Instructions</h4>
                   <div className="space-y-3">
-                    <div className="bg-white rounded-lg p-3 border border-blue-200">
-                      <p className="text-sm font-bold text-gray-700 mb-2">Transfer to:</p>
-                      <p className="text-sm font-bold text-gray-800">Bank: BDO</p>
-                      <p className="text-sm font-bold text-gray-800">Account Name: Kuchefnero Restaurant</p>
-                      <p className="text-lg font-black text-blue-600">Account #: 1234-5678-9012</p>
+                    <div className="bg-white rounded-md p-3 border border-blue-100">
+                      <p className="text-xs text-gray-500 mb-2">Transfer to:</p>
+                      <p className="text-xs text-gray-600">Bank: BDO</p>
+                      <p className="text-xs text-gray-600">Account Name: Kuchefnero Restaurant</p>
+                      <p className="text-base font-medium text-gray-800">Account #: 1234-5678-9012</p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 border border-blue-200">
-                      <p className="text-sm font-bold text-gray-700 mb-1">Amount to transfer:</p>
-                      <p className="text-xl font-black text-blue-600">Php {(getTotalPrice() + 4.99 + getTotalPrice() * 0.08).toFixed(2)}</p>
+                    <div className="bg-white rounded-md p-3 border border-blue-100">
+                      <p className="text-xs text-gray-500 mb-1">Amount to transfer:</p>
+                      <p className="text-lg font-medium text-blue-600">Php {(getTotalPrice() + 4.99 + getTotalPrice() * 0.08).toFixed(2)}</p>
                     </div>
-                    <div className="text-sm text-blue-700 space-y-1">
-                      <p className="font-bold">After transfer:</p>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p className="font-medium">After transfer:</p>
                       <ol className="list-decimal list-inside space-y-1 ml-2">
                         <li>Keep your bank receipt/confirmation</li>
                         <li>Enter the reference number below</li>
@@ -1271,57 +1271,54 @@ function CheckoutPage({ setCurrentPage }) {
                       placeholder="Enter Bank Reference Number"
                       value={formData.paymentReference}
                       onChange={(e) => setFormData({...formData, paymentReference: e.target.value})}
-                      className="w-full px-4 py-3 rounded-lg border-2 border-blue-600 focus:border-blue-700 focus:outline-none font-semibold"
+                      className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            <button 
+            <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-4 rounded-lg font-black transition-all shadow-lg hover:shadow-xl text-lg tracking-wider ${
-                isSubmitting 
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+              className={`w-full py-3 rounded-md font-medium transition-all text-sm ${
+                isSubmitting
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-green-600 text-white hover:bg-green-700'
               }`}
             >
-              {isSubmitting ? 'PROCESSING ORDER...' : `PLACE ORDER - Php ${total.toFixed(2)}`}
+              {isSubmitting ? 'Processing...' : `Place Order - Php ${total.toFixed(2)}`}
             </button>
           </form>
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white bg-opacity-95 rounded-xl shadow-lg p-6 sticky top-24 border-t-4 border-green-600">
-            <h3 className="text-2xl font-black text-green-600 mb-6">ORDER SUMMARY</h3>
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between text-gray-600">
+          <div className="bg-white rounded-lg shadow-sm p-5 sticky top-24">
+            <h3 className="text-base font-medium text-gray-800 mb-4">Order Summary</h3>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-sm text-gray-600">
                 <span>Subtotal</span>
                 <span>Php {getTotalPrice().toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-sm text-gray-600">
                 <span>Delivery Fee</span>
                 <span>Php {deliveryFee.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-sm text-gray-600">
                 <span>Tax (8%)</span>
                 <span>Php {tax.toFixed(2)}</span>
               </div>
-              <div className="border-t-2 border-gray-200 pt-3">
-                <div className="flex justify-between text-xl font-bold">
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="flex justify-between text-base font-medium">
                   <span>Total</span>
                   <span className="text-green-600">Php {total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center">✓ Free delivery on orders over Php 30</p>
-            </div>
           </div>
         </div>
       </div>
-      </div>
+    </div>
     </div>
   );
 }
@@ -1329,97 +1326,93 @@ function CheckoutPage({ setCurrentPage }) {
 // Confirmation Page
 function ConfirmationPage({ setCurrentPage }) {
   return (
-    <div className="bg-gray-50 min-h-screen py-16">
-      <div className="mx-auto px-4" style={{maxWidth: '1800px'}}>
-      <div className="text-center mb-8 mt-8">
-        <div className="text-4xl mb-3">✅</div>
-        <h1 className="text-3xl font-bold text-green-600 mb-2">ORDER CONFIRMED!</h1>
-        <p className="text-gray-600 text-base">Thank you for your order. Your delicious food is on the way!</p>
-      </div>
+    <div className="bg-gray-50 min-h-screen py-8">
+      <div className="w-full px-8">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-medium text-gray-800 mb-1">Order Confirmed</h1>
+          <p className="text-sm text-gray-500">Thank you for your order</p>
+        </div>
 
-      <div className="bg-green-600 rounded-xl p-6 mb-8 shadow-lg">
-        <div className="text-sm text-green-400 font-black mb-2">ORDER NUMBER</div>
-        <div className="text-3xl font-black text-white">#MD{Math.floor(Math.random() * 10000).toString().padStart(5, '0')}</div>
-      </div>
+        {/* Order Number */}
+        <div className="bg-green-600 rounded-lg p-4 mb-6 text-center">
+          <div className="text-xs text-green-200 mb-1">Order Number</div>
+          <div className="text-xl font-medium text-white">#MD{Math.floor(Math.random() * 10000).toString().padStart(5, '0')}</div>
+        </div>
 
-      {/* Timeline */}
-      <div className="bg-white rounded-xl p-6 sm:p-8 mb-8 shadow-lg">
-        <h3 className="text-xl font-black text-green-600 mb-8 text-center">ORDER TIMELINE</h3>
-        <div className="relative">
-          {/* Timeline Line */}
-          <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-green-600 via-green-400 to-gray-300"></div>
+        {/* Order Status */}
+        <div className="bg-white rounded-lg p-5 mb-6 shadow-sm">
+          <h3 className="text-base font-medium text-gray-800 mb-4">Order Status</h3>
 
-          {/* Timeline Items */}
-          <div className="space-y-8 relative">
-            {/* Order Received - Completed */}
-            <div className="flex items-start space-x-4 relative">
-              <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-lg z-10 ring-4 ring-green-100">
-                ✓
+          <div className="space-y-0">
+            {/* Order Confirmed */}
+            <div className="flex items-start gap-3">
+              <div className="flex flex-col items-center">
+                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="w-0.5 h-8 bg-green-500"></div>
               </div>
-              <div className="flex-1 pt-2">
-                <div className="font-black text-green-600 text-lg">ORDER RECEIVED</div>
-                <div className="text-sm text-gray-600 font-bold mt-1">We've received your order</div>
-                <div className="text-xs text-green-600 font-bold mt-1">✓ Completed</div>
+              <div className="pb-3">
+                <div className="text-sm font-medium text-gray-800">Order Received</div>
+                <div className="text-xs text-gray-500">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}, {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</div>
               </div>
             </div>
 
-            {/* Preparing - In Progress */}
-            <div className="flex items-start space-x-4 relative">
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-lg z-10 ring-4 ring-green-100 animate-pulse">
-                👨‍🍳
+            {/* Preparing */}
+            <div className="flex items-start gap-3">
+              <div className="flex flex-col items-center">
+                <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center flex-shrink-0">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                </div>
+                <div className="w-0.5 h-8 bg-gray-200"></div>
               </div>
-              <div className="flex-1 pt-2">
-                <div className="font-black text-green-600 text-lg">PREPARING</div>
-                <div className="text-sm text-gray-600 font-bold mt-1">Your food is being prepared with care</div>
-                <div className="text-xs text-green-500 font-bold mt-1">⏳ In Progress</div>
-              </div>
-            </div>
-
-            {/* Out for Delivery - Pending */}
-            <div className="flex items-start space-x-4 relative">
-              <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-md z-10 ring-4 ring-gray-100">
-                🚗
-              </div>
-              <div className="flex-1 pt-2">
-                <div className="font-black text-gray-500 text-lg">OUT FOR DELIVERY</div>
-                <div className="text-sm text-gray-500 font-bold mt-1">Your order will be on the way soon</div>
-                <div className="text-xs text-gray-400 font-bold mt-1">⏱️ Pending</div>
+              <div className="pb-3">
+                <div className="text-sm font-medium text-gray-800">Preparing your order</div>
+                <div className="text-xs text-gray-500">Estimated: 15-20 mins</div>
               </div>
             </div>
 
-            {/* Delivered - Pending */}
-            <div className="flex items-start space-x-4 relative">
-              <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-2xl text-white font-black shadow-md z-10 ring-4 ring-gray-100">
-                🎉
+            {/* Out for Delivery */}
+            <div className="flex items-start gap-3">
+              <div className="flex flex-col items-center">
+                <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
               </div>
-              <div className="flex-1 pt-2">
-                <div className="font-black text-gray-500 text-lg">DELIVERED</div>
-                <div className="text-sm text-gray-500 font-bold mt-1">Estimated time: 25-30 mins</div>
-                <div className="text-xs text-gray-400 font-bold mt-1">⏱️ Pending</div>
+              <div>
+                <div className="text-sm text-gray-400">Out for delivery</div>
+                <div className="text-xs text-gray-400">Estimated arrival: 25-30 mins</div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="text-center mb-8 py-4 border-t border-gray-200">
-        <p className="text-sm text-gray-600">📱 You will receive a text message with delivery updates</p>
-      </div>
+        {/* SMS Notice */}
+        <div className="text-center mb-6">
+          <p className="text-xs text-gray-500">You will receive a text message with delivery updates</p>
+        </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <button
-          onClick={() => setCurrentPage('home')}
-          className="flex-1 bg-green-600 text-white py-3 rounded-lg font-black hover:bg-green-700 transition-all text-lg tracking-wider"
-        >
-          BACK HOME
-        </button>
-        <button
-          onClick={() => setCurrentPage('menu')}
-          className="flex-1 bg-green-400 text-green-700 py-3 rounded-lg font-black hover:bg-green-500 transition-all text-lg tracking-wider"
-        >
-          ORDER AGAIN
-        </button>
-      </div>
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => setCurrentPage('home')}
+            className="flex-1 bg-green-600 text-white py-2.5 rounded-md text-sm font-medium hover:bg-green-700 transition-all"
+          >
+            Back to Home
+          </button>
+          <button
+            onClick={() => setCurrentPage('menu')}
+            className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-md text-sm font-medium hover:bg-gray-200 transition-all"
+          >
+            Order Again
+          </button>
+        </div>
       </div>
     </div>
   );
