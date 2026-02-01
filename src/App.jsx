@@ -53,11 +53,33 @@ export default function RestaurantApp() {
   const [showCart, setShowCart] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [pendingOrderNumber, setPendingOrderNumber] = useState(null);
 
   // Products state
   const [menuData, setMenuData] = useState(fallbackMenuData);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState(null);
+
+  // Check URL parameters for payment status (after GCash redirect)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const payment = urlParams.get('payment');
+    const orderNumber = urlParams.get('order');
+
+    if (payment && orderNumber) {
+      setPaymentStatus(payment);
+      setPendingOrderNumber(orderNumber);
+      setCurrentPage(payment === 'success' ? 'confirmation' : 'payment-failed');
+      // Clear cart if payment successful
+      if (payment === 'success') {
+        setCartItems([]);
+        localStorage.removeItem('pendingOrder');
+      }
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Fetch products from Google Sheets on mount
   useEffect(() => {
@@ -72,7 +94,6 @@ export default function RestaurantApp() {
         if (data.success && data.products && data.products.length > 0) {
           setMenuData(data.products);
         } else {
-          // Use fallback data if no products returned
           setMenuData(fallbackMenuData);
           setProductsError('Using offline menu data');
         }
@@ -87,6 +108,11 @@ export default function RestaurantApp() {
 
     fetchProducts();
   }, []);
+
+  // Clear cart function
+  const clearCart = () => {
+    setCartItems([]);
+  };
 
   const addToCart = (item, selectedSize = null) => {
     console.log('addToCart called:', { item, selectedSize, hasSizes: !!item.sizes });
@@ -276,8 +302,9 @@ export default function RestaurantApp() {
           />
         )}
         {currentPage === 'cart' && <CartPage setCurrentPage={setCurrentPage} />}
-        {currentPage === 'checkout' && <CheckoutPage setCurrentPage={setCurrentPage} />}
-        {currentPage === 'confirmation' && <ConfirmationPage setCurrentPage={setCurrentPage} />}
+        {currentPage === 'checkout' && <CheckoutPage setCurrentPage={setCurrentPage} clearCart={clearCart} />}
+        {currentPage === 'confirmation' && <ConfirmationPage setCurrentPage={setCurrentPage} orderNumber={pendingOrderNumber} paymentStatus={paymentStatus} />}
+        {currentPage === 'payment-failed' && <PaymentFailedPage setCurrentPage={setCurrentPage} orderNumber={pendingOrderNumber} />}
         {showCart && <CartDrawer setShowCart={setShowCart} setCurrentPage={setCurrentPage} />}
         {showSizeModal && selectedProduct && (
           <SizeModal
@@ -345,18 +372,62 @@ function Header({ currentPage, setCurrentPage, setShowCart, searchQuery, setSear
   const { getTotalItems } = useCart();
 
   return (
-    <header className="bg-green-600 shadow-2xl sticky top-0 z-50 border-b-4 border-green-400">
-      <div className="w-full px-8 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-            <div className="text-5xl font-black text-white drop-shadow-lg">K</div>
-            <div>
-              <h1 className="text-3xl font-black text-white drop-shadow-lg tracking-wider">Kuchefnero.ph</h1>
-              <p className="text-xs text-white font-bold">Food Ordering System (ver 1.0)</p>
+    <header className="sticky top-0 z-50">
+      <div className="bg-green-600">
+        <div className="w-full px-8 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
+              <div className="text-5xl font-black text-white drop-shadow-lg">K</div>
+              <div>
+                <h1 className="text-3xl font-black text-white drop-shadow-lg tracking-wider">Kuchefnero.ph</h1>
+                <p className="text-xs text-white font-bold">Food Ordering System (ver 1.0)</p>
+              </div>
             </div>
+
+            <div className="hidden md:flex flex-1 max-w-md mx-6 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-700 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search for food..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value && currentPage !== 'menu') setCurrentPage('menu');
+                }}
+                className="w-full pl-10 pr-4 py-2 rounded-full border-2 border-green-500 focus:border-green-700 focus:outline-none font-bold text-green-800 bg-green-100 placeholder-green-700/50"
+              />
+            </div>
+
+            <nav className="hidden md:flex items-center space-x-4">
+              <button
+                onClick={() => setCurrentPage('home')}
+                className={`font-black transition-all px-4 py-2 rounded-lg text-sm tracking-wider ${currentPage === 'home' ? 'bg-green-400 text-green-700' : 'text-green-400 hover:bg-green-700'}`}
+              >
+                HOME
+              </button>
+              <button
+                onClick={() => setCurrentPage('menu')}
+                className={`font-black transition-all px-4 py-2 rounded-lg text-sm tracking-wider ${currentPage === 'menu' ? 'bg-green-400 text-green-700' : 'text-green-400 hover:bg-green-700'}`}
+              >
+                MENU
+              </button>
+            </nav>
+
+            <button
+              onClick={() => setShowCart(true)}
+              className="relative bg-green-400 text-white px-6 py-2 rounded-full hover:shadow-2xl transition-all flex items-center space-x-2 shadow-lg hover:scale-105 font-black text-sm"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span>CART</span>
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-black animate-bounce">
+                  {getTotalItems()}
+                </span>
+              )}
+            </button>
           </div>
 
-          <div className="hidden md:flex flex-1 max-w-md mx-6 relative">
+          <div className="mt-3 md:hidden relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-700 w-5 h-5" />
             <input
               type="text"
@@ -369,50 +440,13 @@ function Header({ currentPage, setCurrentPage, setShowCart, searchQuery, setSear
               className="w-full pl-10 pr-4 py-2 rounded-full border-2 border-green-500 focus:border-green-700 focus:outline-none font-bold text-green-800 bg-green-100 placeholder-green-700/50"
             />
           </div>
-
-          <nav className="hidden md:flex items-center space-x-4">
-            <button 
-              onClick={() => setCurrentPage('home')}
-              className={`font-black transition-all px-4 py-2 rounded-lg text-sm tracking-wider ${currentPage === 'home' ? 'bg-green-400 text-green-700' : 'text-green-400 hover:bg-green-700'}`}
-            >
-              HOME
-            </button>
-            <button 
-              onClick={() => setCurrentPage('menu')}
-              className={`font-black transition-all px-4 py-2 rounded-lg text-sm tracking-wider ${currentPage === 'menu' ? 'bg-green-400 text-green-700' : 'text-green-400 hover:bg-green-700'}`}
-            >
-              MENU
-            </button>
-          </nav>
-
-          <button
-            onClick={() => setShowCart(true)}
-            className="relative bg-green-400 text-white px-6 py-2 rounded-full hover:shadow-2xl transition-all flex items-center space-x-2 shadow-lg hover:scale-105 font-black text-sm"
-          >
-            <ShoppingCart className="w-5 h-5" />
-            <span>CART</span>
-            {getTotalItems() > 0 && (
-              <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-black animate-bounce">
-                {getTotalItems()}
-              </span>
-            )}
-          </button>
-        </div>
-
-        <div className="mt-3 md:hidden relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-700 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search for food..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              if (e.target.value && currentPage !== 'menu') setCurrentPage('menu');
-            }}
-            className="w-full pl-10 pr-4 py-2 rounded-full border-2 border-green-500 focus:border-green-700 focus:outline-none font-bold text-green-800 bg-green-100 placeholder-green-700/50"
-          />
         </div>
       </div>
+      {/* Brush stroke edge */}
+      <svg className="w-full h-5 -mt-px" viewBox="0 0 1440 20" preserveAspectRatio="none">
+        <path fill="#007A33" d="M0,0 L0,10 C40,14 60,8 100,12 C160,18 200,6 280,14 C340,20 400,8 480,11 C560,14 600,6 680,10 C760,15 820,5 900,12 C960,17 1020,7 1100,10 C1180,13 1240,6 1320,11 C1380,15 1420,8 1440,10 L1440,0 Z" />
+        <path fill="#007A33" opacity="0.7" d="M0,0 L0,6 C60,10 100,4 160,8 C240,14 300,4 380,9 C460,14 520,5 600,8 C680,12 740,4 820,7 C900,11 960,3 1040,8 C1120,12 1180,5 1260,7 C1340,10 1400,4 1440,6 L1440,0 Z" />
+      </svg>
     </header>
   );
 }
@@ -1004,7 +1038,7 @@ function CartItemCard({ item, detailed = false }) {
 }
 
 // Checkout Page
-function CheckoutPage({ setCurrentPage }) {
+function CheckoutPage({ setCurrentPage, clearCart }) {
   const { getTotalPrice, cartItems } = useCart();
   const [formData, setFormData] = useState({
     name: '',
@@ -1021,18 +1055,15 @@ function CheckoutPage({ setCurrentPage }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate payment reference for GCash and Bank Transfer
-    if ((formData.paymentMethod === 'gcash' || formData.paymentMethod === 'bank') && !formData.paymentReference.trim()) {
-      alert(`Please enter the ${formData.paymentMethod === 'gcash' ? 'GCash' : 'Bank'} reference number.`);
+    // Validate payment reference for Bank Transfer only (GCash uses PayMongo)
+    if (formData.paymentMethod === 'bank' && !formData.paymentReference.trim()) {
+      alert('Please enter the Bank reference number.');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Prepare order data
-      const orderNumber = `MD${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`;
-      const orderDate = new Date().toLocaleString();
       const deliveryFee = 4.99;
       const tax = getTotalPrice() * 0.08;
       const total = getTotalPrice() + deliveryFee + tax;
@@ -1047,21 +1078,18 @@ function CheckoutPage({ setCurrentPage }) {
       if (formData.paymentMethod === 'cash') {
         paymentMethodDisplay = 'Cash on Delivery';
       } else if (formData.paymentMethod === 'gcash') {
-        paymentMethodDisplay = `GCash (Ref: ${formData.paymentReference})`;
+        paymentMethodDisplay = 'GCash';
       } else if (formData.paymentMethod === 'bank') {
         paymentMethodDisplay = `Bank Transfer (Ref: ${formData.paymentReference})`;
       }
 
-      // Send data to Google Sheets (uses GOOGLE_SCRIPT_URL from top of file)
+      // Send data to Google Sheets
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // Important for Google Apps Script
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          orderNumber: orderNumber,
-          orderDate: orderDate,
           fullName: formData.name,
           email: formData.email,
           phone: formData.phone,
@@ -1078,10 +1106,25 @@ function CheckoutPage({ setCurrentPage }) {
         })
       });
 
-      // Navigate to confirmation page
-      setCurrentPage('confirmation');
+      const result = await response.json();
+
+      if (result.success) {
+        // If GCash payment, redirect to PayMongo checkout
+        if (result.requiresPayment && result.paymentUrl) {
+          // Store order number for later reference
+          localStorage.setItem('pendingOrder', result.orderNumber);
+          // Redirect to GCash payment page
+          window.location.href = result.paymentUrl;
+        } else {
+          // Clear cart and go to confirmation for non-GCash payments
+          if (clearCart) clearCart();
+          setCurrentPage('confirmation');
+        }
+      } else {
+        alert('Error: ' + (result.error || 'Failed to process order'));
+      }
     } catch (error) {
-      console.error('Error saving to Google Sheets:', error);
+      console.error('Error processing order:', error);
       alert('There was an error processing your order. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -1214,32 +1257,26 @@ function CheckoutPage({ setCurrentPage }) {
 
               {formData.paymentMethod === 'gcash' && (
                 <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
-                  <h4 className="font-medium text-gray-700 text-sm mb-3">GCash Payment Instructions</h4>
+                  <h4 className="font-medium text-gray-700 text-sm mb-3">GCash Payment</h4>
                   <div className="space-y-3">
                     <div className="bg-white rounded-md p-3 border border-green-100">
-                      <p className="text-xs text-gray-500 mb-1">Send payment to:</p>
-                      <p className="text-base font-medium text-gray-800">0912 345 6789</p>
-                      <p className="text-xs text-gray-500">Name: Kuchefnero Restaurant</p>
-                    </div>
-                    <div className="bg-white rounded-md p-3 border border-green-100">
-                      <p className="text-xs text-gray-500 mb-1">Amount to send:</p>
+                      <p className="text-xs text-gray-500 mb-1">Amount to pay:</p>
                       <p className="text-lg font-medium text-green-600">Php {(getTotalPrice() + 4.99 + getTotalPrice() * 0.08).toFixed(2)}</p>
                     </div>
-                    <div className="text-xs text-gray-600 space-y-1">
-                      <p className="font-medium">After payment:</p>
-                      <ol className="list-decimal list-inside space-y-1 ml-2">
-                        <li>Take a screenshot of the payment confirmation</li>
-                        <li>Note the reference number below</li>
-                        <li>Send screenshot to our Facebook page or Viber</li>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      <span>Secure payment via PayMongo</span>
+                    </div>
+                    <div className="text-xs text-gray-600 bg-white rounded-md p-3 border border-green-100">
+                      <p className="font-medium mb-2">How it works:</p>
+                      <ol className="list-decimal list-inside space-y-1">
+                        <li>Click "Place Order" below</li>
+                        <li>You'll be redirected to GCash to complete payment</li>
+                        <li>After payment, you'll return here automatically</li>
                       </ol>
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Enter GCash Reference Number"
-                      value={formData.paymentReference}
-                      onChange={(e) => setFormData({...formData, paymentReference: e.target.value})}
-                      className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm"
-                    />
                   </div>
                 </div>
               )}
@@ -1324,7 +1361,10 @@ function CheckoutPage({ setCurrentPage }) {
 }
 
 // Confirmation Page
-function ConfirmationPage({ setCurrentPage }) {
+function ConfirmationPage({ setCurrentPage, orderNumber, paymentStatus }) {
+  // Generate order number if not provided (for non-GCash orders)
+  const displayOrderNumber = orderNumber || `ORD-${Date.now()}`;
+
   return (
     <div className="bg-gray-50 min-h-screen py-8">
       <div className="w-full px-8">
@@ -1335,14 +1375,18 @@ function ConfirmationPage({ setCurrentPage }) {
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
           </div>
-          <h1 className="text-xl font-medium text-gray-800 mb-1">Order Confirmed</h1>
-          <p className="text-sm text-gray-500">Thank you for your order</p>
+          <h1 className="text-xl font-medium text-gray-800 mb-1">
+            {paymentStatus === 'success' ? 'Payment Successful!' : 'Order Confirmed'}
+          </h1>
+          <p className="text-sm text-gray-500">
+            {paymentStatus === 'success' ? 'Your GCash payment has been received' : 'Thank you for your order'}
+          </p>
         </div>
 
         {/* Order Number */}
         <div className="bg-green-600 rounded-lg p-4 mb-6 text-center">
           <div className="text-xs text-green-200 mb-1">Order Number</div>
-          <div className="text-xl font-medium text-white">#MD{Math.floor(Math.random() * 10000).toString().padStart(5, '0')}</div>
+          <div className="text-xl font-medium text-white">{displayOrderNumber}</div>
         </div>
 
         {/* Order Status */}
@@ -1411,6 +1455,64 @@ function ConfirmationPage({ setCurrentPage }) {
             className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-md text-sm font-medium hover:bg-gray-200 transition-all"
           >
             Order Again
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Payment Failed Page
+function PaymentFailedPage({ setCurrentPage, orderNumber }) {
+  return (
+    <div className="bg-gray-50 min-h-screen py-8">
+      <div className="w-full px-8 max-w-md mx-auto">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-medium text-gray-800 mb-1">Payment Failed</h1>
+          <p className="text-sm text-gray-500">Your GCash payment was not completed</p>
+        </div>
+
+        {/* Order Number */}
+        {orderNumber && (
+          <div className="bg-gray-200 rounded-lg p-4 mb-6 text-center">
+            <div className="text-xs text-gray-500 mb-1">Order Number</div>
+            <div className="text-xl font-medium text-gray-700">{orderNumber}</div>
+          </div>
+        )}
+
+        {/* Message */}
+        <div className="bg-white rounded-lg p-5 mb-6 shadow-sm">
+          <h3 className="text-base font-medium text-gray-800 mb-3">What happened?</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Your payment was cancelled or failed to process. Your order has been saved but is awaiting payment.
+          </p>
+          <h3 className="text-base font-medium text-gray-800 mb-3">What can you do?</h3>
+          <ul className="text-sm text-gray-600 space-y-2">
+            <li>• Try placing your order again with GCash</li>
+            <li>• Choose a different payment method (Cash on Delivery)</li>
+            <li>• Contact us if you need assistance</li>
+          </ul>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setCurrentPage('checkout')}
+            className="w-full bg-green-600 text-white py-2.5 rounded-md text-sm font-medium hover:bg-green-700 transition-all"
+          >
+            Try Again
+          </button>
+          <button
+            onClick={() => setCurrentPage('home')}
+            className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-md text-sm font-medium hover:bg-gray-200 transition-all"
+          >
+            Back to Home
           </button>
         </div>
       </div>
