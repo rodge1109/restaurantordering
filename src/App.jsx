@@ -1120,6 +1120,59 @@ function CheckoutPage({ setCurrentPage, clearCart }) {
     paymentReference: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState('checking'); // 'checking', 'subscribed', 'not-subscribed', 'denied'
+
+  // Check notification subscription status on mount
+  useEffect(() => {
+    const checkNotificationStatus = async () => {
+      try {
+        if (window.OneSignalDeferred) {
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            const permission = await OneSignal.Notifications.permission;
+            const playerId = await OneSignal.User.PushSubscription.id;
+
+            if (permission === false) {
+              setNotificationStatus('denied');
+            } else if (playerId) {
+              setNotificationStatus('subscribed');
+            } else {
+              setNotificationStatus('not-subscribed');
+            }
+          });
+        } else {
+          setNotificationStatus('not-subscribed');
+        }
+      } catch (err) {
+        console.log('Error checking notification status:', err);
+        setNotificationStatus('not-subscribed');
+      }
+    };
+
+    checkNotificationStatus();
+  }, []);
+
+  // Function to request notification permission
+  const requestNotificationPermission = async () => {
+    try {
+      if (window.OneSignalDeferred) {
+        window.OneSignalDeferred.push(async function(OneSignal) {
+          await OneSignal.Notifications.requestPermission();
+          // Check status after requesting
+          const playerId = await OneSignal.User.PushSubscription.id;
+          if (playerId) {
+            setNotificationStatus('subscribed');
+          } else {
+            const permission = await OneSignal.Notifications.permission;
+            if (permission === false) {
+              setNotificationStatus('denied');
+            }
+          }
+        });
+      }
+    } catch (err) {
+      console.log('Error requesting notification permission:', err);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1278,6 +1331,69 @@ function CheckoutPage({ setCurrentPage, clearCart }) {
                 className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-green-500 focus:outline-none text-sm mt-3"
               />
             </div>
+
+            {/* Notification Subscription Prompt */}
+            {notificationStatus === 'checking' && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                  <span className="text-sm text-gray-600">Checking notification status...</span>
+                </div>
+              </div>
+            )}
+
+            {notificationStatus !== 'subscribed' && notificationStatus !== 'checking' && (
+              <div className={`rounded-lg p-4 border-2 ${
+                notificationStatus === 'denied'
+                  ? 'bg-red-50 border-red-200'
+                  : 'bg-yellow-50 border-yellow-300'
+              }`}>
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl flex-shrink-0">
+                    {notificationStatus === 'denied' ? '🔕' : '🔔'}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-800 text-sm mb-1">
+                      {notificationStatus === 'denied'
+                        ? 'Notifications Blocked'
+                        : 'Get Order Updates'}
+                    </h4>
+                    <p className="text-xs text-gray-600 mb-3">
+                      {notificationStatus === 'denied'
+                        ? 'You\'ve blocked notifications. Enable them in your browser settings to receive real-time order updates.'
+                        : 'Enable push notifications to receive real-time updates when your order is being prepared, out for delivery, and delivered!'}
+                    </p>
+                    {notificationStatus === 'not-subscribed' && (
+                      <button
+                        type="button"
+                        onClick={requestNotificationPermission}
+                        className="bg-green-600 text-white px-4 py-2 rounded-md text-xs font-medium hover:bg-green-700 transition-all flex items-center gap-2"
+                      >
+                        <span>🔔</span>
+                        <span>Enable Notifications</span>
+                      </button>
+                    )}
+                    {notificationStatus === 'denied' && (
+                      <p className="text-xs text-red-600 font-medium">
+                        To enable: Click the lock icon in your browser's address bar → Allow notifications
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {notificationStatus === 'subscribed' && (
+              <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">✅</div>
+                  <div>
+                    <h4 className="font-medium text-green-700 text-sm">Notifications Enabled</h4>
+                    <p className="text-xs text-green-600">You'll receive updates when your order status changes!</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <h3 className="text-base font-medium text-gray-700 mb-4">Payment Method</h3>
