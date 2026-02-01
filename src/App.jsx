@@ -109,6 +109,39 @@ export default function RestaurantApp() {
     fetchProducts();
   }, []);
 
+  // Initialize OneSignal Push Notifications
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.OneSignalDeferred) {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "22fa0af9-4790-4b61-9f6d-573237f0585d", // Replace with your OneSignal App ID
+          notifyButton: {
+            enable: true,
+            size: 'small',
+            position: 'bottom-right',
+            prenotify: true,
+            showCredit: false,
+            text: {
+              'tip.state.unsubscribed': 'Get order updates',
+              'tip.state.subscribed': 'You\'re subscribed!',
+              'tip.state.blocked': 'Notifications blocked',
+              'message.prenotify': 'Click to receive order updates',
+              'message.action.subscribed': 'Thanks for subscribing!',
+              'dialog.main.title': 'Manage Notifications',
+              'dialog.main.button.subscribe': 'SUBSCRIBE',
+              'dialog.main.button.unsubscribe': 'UNSUBSCRIBE',
+            }
+          },
+          welcomeNotification: {
+            title: "Welcome to Kuchefnero!",
+            message: "You'll receive order updates here."
+          }
+        });
+      });
+    }
+  }, []);
+
   // Clear cart function
   const clearCart = () => {
     setCartItems([]);
@@ -1119,6 +1152,21 @@ function CheckoutPage({ setCurrentPage, clearCart }) {
         paymentMethodDisplay = `Bank Transfer (Ref: ${formData.paymentReference})`;
       }
 
+      // Get OneSignal Player ID for customer notifications
+      let playerId = null;
+      try {
+        if (window.OneSignalDeferred) {
+          await new Promise((resolve) => {
+            window.OneSignalDeferred.push(async function(OneSignal) {
+              playerId = await OneSignal.User.PushSubscription.id;
+              resolve();
+            });
+          });
+        }
+      } catch (err) {
+        console.log('Could not get OneSignal player ID:', err);
+      }
+
       // Send data to Google Sheets
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
@@ -1131,6 +1179,7 @@ function CheckoutPage({ setCurrentPage, clearCart }) {
           barangay: formData.zipCode,
           paymentMethod: paymentMethodDisplay,
           paymentReference: formData.paymentReference || 'N/A',
+          playerId: playerId || '',
           items: itemsList,
           subtotal: getTotalPrice().toFixed(2),
           deliveryFee: deliveryFee.toFixed(2),

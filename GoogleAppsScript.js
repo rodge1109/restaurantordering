@@ -1,6 +1,6 @@
 // Google Apps Script for Restaurant Ordering System
 // This script handles both reading products (GET) and saving orders (POST)
-// Includes PayMongo GCash integration
+// Includes PayMongo GCash integration and OneSignal Push Notifications
 
 // ===========================
 // CONFIGURATION - SMS SETTINGS
@@ -8,6 +8,14 @@
 const SEMAPHORE_API_KEY = 'YOUR_SEMAPHORE_API_KEY_HERE';
 const SEMAPHORE_SENDER_NAME = 'Kuchefnero';
 const SMS_ENABLED = true;
+
+// ===========================
+// CONFIGURATION - ONESIGNAL PUSH NOTIFICATIONS
+// ===========================
+// Get your keys from: https://onesignal.com (Settings > Keys & IDs)
+const ONESIGNAL_APP_ID = '22fa0af9-4790-4b61-9f6d-573237f0585d';
+const ONESIGNAL_REST_API_KEY = 'YOUR_ONESIGNAL_REST_API_KEY_HERE';
+const PUSH_ENABLED = true;
 
 // ===========================
 // CONFIGURATION - PAYMONGO SETTINGS
@@ -235,6 +243,301 @@ function sendSMS(phoneNumber, message) {
 }
 
 // ===========================
+// ONESIGNAL PUSH NOTIFICATION FUNCTION
+// ===========================
+/**
+ * Send push notification to all subscribed users
+ * @param {string} title - Notification title
+ * @param {string} message - Notification message
+ * @param {object} data - Optional additional data
+ */
+function sendPushNotification(title, message, data = {}) {
+  if (!PUSH_ENABLED) {
+    Logger.log('Push notifications are disabled');
+    return { success: false, message: 'Push disabled' };
+  }
+
+  if (!ONESIGNAL_APP_ID || ONESIGNAL_APP_ID.indexOf('YOUR_') === 0) {
+    Logger.log('OneSignal App ID not configured');
+    return { success: false, message: 'OneSignal not configured' };
+  }
+
+  try {
+    const url = 'https://onesignal.com/api/v1/notifications';
+
+    const payload = {
+      app_id: ONESIGNAL_APP_ID,
+      included_segments: ['All'], // Send to all subscribers
+      headings: { en: title },
+      contents: { en: message },
+      data: data,
+      chrome_web_icon: 'https://restaurantordering-l3oj.onrender.com/vite.svg',
+      url: 'https://restaurantordering-l3oj.onrender.com'
+    };
+
+    const options = {
+      method: 'post',
+      contentType: 'application/json',
+      headers: {
+        'Authorization': 'Basic ' + ONESIGNAL_REST_API_KEY
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    Logger.log('OneSignal Response: ' + responseCode + ' - ' + responseText);
+
+    if (responseCode === 200 || responseCode === 201) {
+      return { success: true, result: JSON.parse(responseText) };
+    } else {
+      return { success: false, message: 'OneSignal error: ' + responseCode };
+    }
+  } catch (error) {
+    Logger.log('Push Notification Error: ' + error.toString());
+    return { success: false, message: error.toString() };
+  }
+}
+
+/**
+ * Send push notification to a specific customer by player ID
+ * @param {string} playerId - OneSignal Player ID
+ * @param {string} title - Notification title
+ * @param {string} message - Notification message
+ * @param {object} data - Optional additional data
+ */
+function sendPushToCustomer(playerId, title, message, data = {}) {
+  if (!PUSH_ENABLED || !playerId) {
+    Logger.log('Push disabled or no player ID');
+    return { success: false, message: 'Push disabled or no player ID' };
+  }
+
+  if (!ONESIGNAL_APP_ID || ONESIGNAL_APP_ID.indexOf('YOUR_') === 0) {
+    Logger.log('OneSignal App ID not configured');
+    return { success: false, message: 'OneSignal not configured' };
+  }
+
+  try {
+    const url = 'https://onesignal.com/api/v1/notifications';
+
+    const payload = {
+      app_id: ONESIGNAL_APP_ID,
+      include_player_ids: [playerId], // Send to specific customer
+      headings: { en: title },
+      contents: { en: message },
+      data: data,
+      chrome_web_icon: 'https://restaurantordering-l3oj.onrender.com/vite.svg',
+      url: 'https://restaurantordering-l3oj.onrender.com'
+    };
+
+    const options = {
+      method: 'post',
+      contentType: 'application/json',
+      headers: {
+        'Authorization': 'Basic ' + ONESIGNAL_REST_API_KEY
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    Logger.log('OneSignal Customer Push: ' + responseCode + ' - ' + responseText);
+
+    if (responseCode === 200 || responseCode === 201) {
+      return { success: true, result: JSON.parse(responseText) };
+    } else {
+      return { success: false, message: 'OneSignal error: ' + responseCode };
+    }
+  } catch (error) {
+    Logger.log('Customer Push Error: ' + error.toString());
+    return { success: false, message: error.toString() };
+  }
+}
+
+/**
+ * Send order confirmation push to customer (by player_id if available)
+ * @param {string} playerId - Customer's OneSignal Player ID
+ * @param {string} orderNumber - The order number
+ * @param {string} customerName - Customer's name
+ */
+function sendOrderConfirmationPush(playerId, orderNumber, customerName) {
+  if (!playerId) {
+    Logger.log('No player ID for customer notification');
+    return { success: false, message: 'No player ID' };
+  }
+
+  return sendPushToCustomer(
+    playerId,
+    '🎉 Order Confirmed!',
+    `Hi ${customerName}! Your order ${orderNumber} has been received. We're preparing it now!`,
+    { orderNumber: orderNumber, type: 'order_confirmed' }
+  );
+}
+
+/**
+ * Send new order alert to restaurant staff
+ * @param {string} orderNumber - The order number
+ * @param {string} total - Order total
+ */
+function sendNewOrderAlertPush(orderNumber, total) {
+  return sendPushNotification(
+    '🔔 New Order Received!',
+    `Order ${orderNumber} - Total: Php ${total}. Check your dashboard!`,
+    { orderNumber: orderNumber, type: 'new_order' }
+  );
+}
+
+/**
+ * Send "Preparing" notification to customer
+ * @param {string} playerId - Customer's OneSignal Player ID
+ * @param {string} orderNumber - The order number
+ */
+function sendPreparingPush(playerId, orderNumber) {
+  if (!playerId) return { success: false, message: 'No player ID' };
+
+  return sendPushToCustomer(
+    playerId,
+    '👨‍🍳 Preparing Your Order!',
+    `Your order ${orderNumber} is now being prepared. Almost ready!`,
+    { orderNumber: orderNumber, type: 'preparing' }
+  );
+}
+
+/**
+ * Send "Out for Delivery" notification to customer
+ * @param {string} playerId - Customer's OneSignal Player ID
+ * @param {string} orderNumber - The order number
+ */
+function sendOutForDeliveryPush(playerId, orderNumber) {
+  if (!playerId) return { success: false, message: 'No player ID' };
+
+  return sendPushToCustomer(
+    playerId,
+    '🚴 On The Way!',
+    `Your order ${orderNumber} is out for delivery. See you soon!`,
+    { orderNumber: orderNumber, type: 'out_for_delivery' }
+  );
+}
+
+/**
+ * Send "Delivered" notification to customer
+ * @param {string} playerId - Customer's OneSignal Player ID
+ * @param {string} orderNumber - The order number
+ */
+function sendDeliveredPush(playerId, orderNumber) {
+  if (!playerId) return { success: false, message: 'No player ID' };
+
+  return sendPushToCustomer(
+    playerId,
+    '✅ Order Delivered!',
+    `Your order ${orderNumber} has been delivered. Enjoy your meal! 🍽️`,
+    { orderNumber: orderNumber, type: 'delivered' }
+  );
+}
+
+/**
+ * Send notification based on order status change
+ * Call this function when you update order status in the sheet
+ * @param {string} orderNumber - The order number to notify
+ * @param {string} newStatus - New status: "Preparing", "Out for Delivery", "Delivered"
+ */
+function notifyCustomerStatusChange(orderNumber, newStatus) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Orders');
+  if (!sheet) return { success: false, message: 'Orders sheet not found' };
+
+  const data = sheet.getDataRange().getValues();
+
+  // Find order by order number (column B, index 1)
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][1] === orderNumber) {
+      const playerId = data[i][16]; // Column Q (index 16) is player ID
+
+      if (!playerId) {
+        Logger.log('No player ID for order ' + orderNumber);
+        return { success: false, message: 'Customer not subscribed to notifications' };
+      }
+
+      let result;
+      switch (newStatus.toLowerCase()) {
+        case 'preparing':
+          result = sendPreparingPush(playerId, orderNumber);
+          break;
+        case 'out for delivery':
+          result = sendOutForDeliveryPush(playerId, orderNumber);
+          break;
+        case 'delivered':
+          result = sendDeliveredPush(playerId, orderNumber);
+          break;
+        default:
+          return { success: false, message: 'Unknown status: ' + newStatus };
+      }
+
+      Logger.log('Status notification sent for ' + orderNumber + ': ' + JSON.stringify(result));
+      return result;
+    }
+  }
+
+  return { success: false, message: 'Order not found: ' + orderNumber };
+}
+
+/**
+ * AUTO-TRIGGER: Detect status changes in Orders sheet
+ * Set this up as an "onEdit" trigger in Google Apps Script
+ */
+function onOrderStatusChange(e) {
+  try {
+    // Safety check for event object
+    if (!e || !e.source || !e.range) {
+      Logger.log('onOrderStatusChange: Invalid event object');
+      return;
+    }
+
+    // Check if edit was in Orders sheet
+    const sheet = e.source.getActiveSheet();
+    if (sheet.getName() !== 'Orders') return;
+
+    const range = e.range;
+    const col = range.getColumn();
+    const row = range.getRow();
+
+    // Column P is status (column 16)
+    if (col !== 16 || row < 2) return;
+
+    // Get the new status value (e.value can be undefined, so use range.getValue() as fallback)
+    const newStatus = e.value || range.getValue();
+
+    if (!newStatus || typeof newStatus !== 'string') {
+      Logger.log('onOrderStatusChange: No valid status value');
+      return;
+    }
+
+    const orderNumber = sheet.getRange(row, 2).getValue(); // Column B
+
+    if (!orderNumber) {
+      Logger.log('onOrderStatusChange: No order number found in row ' + row);
+      return;
+    }
+
+    Logger.log('Status change detected - Order: ' + orderNumber + ', New Status: ' + newStatus);
+
+    // Only notify for these status changes
+    const notifyStatuses = ['preparing', 'out for delivery', 'delivered'];
+    if (notifyStatuses.includes(newStatus.toLowerCase())) {
+      const result = notifyCustomerStatusChange(orderNumber, newStatus);
+      Logger.log('Notification result: ' + JSON.stringify(result));
+    }
+  } catch (error) {
+    Logger.log('onOrderStatusChange Error: ' + error.toString());
+  }
+}
+
+// ===========================
 // TEST FUNCTIONS
 // ===========================
 function testSMS() {
@@ -259,6 +562,20 @@ function testPayMongo() {
     Logger.log('GCash Checkout URL: ' + result.checkoutUrl);
   }
 
+  return result;
+}
+
+function testPushNotification() {
+  Logger.log('=== PUSH NOTIFICATION TEST ===');
+  Logger.log('App ID configured: ' + (ONESIGNAL_APP_ID.indexOf('YOUR_') === -1));
+  Logger.log('REST API Key configured: ' + (ONESIGNAL_REST_API_KEY.indexOf('YOUR_') === -1));
+
+  const result = sendPushNotification(
+    '🧪 Test Notification',
+    'This is a test push notification from Kuchefnero!',
+    { test: true }
+  );
+  Logger.log('Result: ' + JSON.stringify(result));
   return result;
 }
 
@@ -417,7 +734,7 @@ function doPost(e) {
       }
     }
 
-    // Save order to sheet
+    // Save order to sheet (including player ID for customer notifications)
     sheet.appendRow([
       timestamp,
       orderNumber,
@@ -434,7 +751,8 @@ function doPost(e) {
       data.deliveryFee || 0,
       data.tax || 0,
       data.total || 0,
-      initialStatus
+      initialStatus,
+      data.playerId || '' // Column Q: OneSignal Player ID for notifications
     ]);
 
     // For non-GCash payments, send SMS confirmation immediately
@@ -442,6 +760,26 @@ function doPost(e) {
     if (data.paymentMethod !== 'GCash' && data.paymentMethod !== 'gcash' && data.phone) {
       const smsMessage = `Hi ${data.fullName}! Your order ${orderNumber} has been confirmed. Total: Php ${data.total}. Payment: ${data.paymentMethod}. We'll deliver to ${data.address}, ${data.city} in 25-30 mins. Thank you for ordering from Kuchefnero!`;
       smsResult = sendSMS(data.phone, smsMessage);
+    }
+
+    // Send push notification for new order (to restaurant staff)
+    let pushResult = null;
+    try {
+      pushResult = sendNewOrderAlertPush(orderNumber, data.total);
+      Logger.log('Staff push notification result: ' + JSON.stringify(pushResult));
+    } catch (pushError) {
+      Logger.log('Staff push notification error: ' + pushError.toString());
+    }
+
+    // Send push notification to customer (if they subscribed)
+    let customerPushResult = null;
+    if (data.playerId) {
+      try {
+        customerPushResult = sendOrderConfirmationPush(data.playerId, orderNumber, data.fullName);
+        Logger.log('Customer push notification result: ' + JSON.stringify(customerPushResult));
+      } catch (customerPushError) {
+        Logger.log('Customer push notification error: ' + customerPushError.toString());
+      }
     }
 
     // Build response
