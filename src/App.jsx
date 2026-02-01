@@ -11,7 +11,7 @@ const useCart = () => {
 };
 
 // Google Sheets API URL - UPDATE THIS WITH YOUR WEB APP URL
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym6702IouGsIS_BM_ZFMbUI28L7jOwvUsBOzRKPBCgPS5mfnCSCQSS9SWorxPa6Im9/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQNLHXp9Fzi0_mVxYmV7M0xSA2bqteLxIDzA96nAsaIObDEAhwGN9oX1lOAoY72BaL/exec';
 
 // Fallback Menu Data (used if Google Sheets fetch fails)
 const fallbackMenuData = [
