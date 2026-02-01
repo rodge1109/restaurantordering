@@ -1086,9 +1086,6 @@ function CheckoutPage({ setCurrentPage, clearCart }) {
       // Send data to Google Sheets
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           fullName: formData.name,
           email: formData.email,
