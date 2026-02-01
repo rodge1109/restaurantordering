@@ -277,7 +277,7 @@ export default function RestaurantApp() {
           --tw-gradient-to: #008C3C !important;
         }
       `}</style>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 pb-16 md:pb-0">
         <Header
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -320,6 +320,42 @@ export default function RestaurantApp() {
             }}
           />
         )}
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-50 pb-safe">
+          <div className="flex justify-around items-center py-2">
+            <button
+              onClick={() => setCurrentPage('home')}
+              className={`flex flex-col items-center px-4 py-1 ${currentPage === 'home' ? 'text-green-600' : 'text-gray-500'}`}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span className="text-xs font-medium">Home</span>
+            </button>
+            <button
+              onClick={() => setCurrentPage('menu')}
+              className={`flex flex-col items-center px-4 py-1 ${currentPage === 'menu' ? 'text-green-600' : 'text-gray-500'}`}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <span className="text-xs font-medium">Menu</span>
+            </button>
+            <button
+              onClick={() => setShowCart(true)}
+              className={`flex flex-col items-center px-4 py-1 relative ${showCart ? 'text-green-600' : 'text-gray-500'}`}
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-1 right-2 bg-green-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {getTotalItems()}
+                </span>
+              )}
+              <span className="text-xs font-medium">Cart</span>
+            </button>
+          </div>
+        </nav>
       </div>
     </CartContext.Provider>
   );
@@ -377,10 +413,10 @@ function Header({ currentPage, setCurrentPage, setShowCart, searchQuery, setSear
         <div className="w-full px-8 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-              <div className="text-5xl font-black text-white drop-shadow-lg">K</div>
+              <div className="text-4xl font-black text-white drop-shadow-lg">K</div>
               <div>
-                <h1 className="text-3xl font-black text-white drop-shadow-lg tracking-wider">Kuchefnero.ph</h1>
-                <p className="text-xs text-white font-bold">Food Ordering System (ver 1.0)</p>
+                <h1 className="text-xl font-black text-white drop-shadow-lg tracking-wider">Kuchefnero.ph</h1>
+                <p className="text-[9px] text-white font-bold">Food Ordering System (ver 1.0)</p>
               </div>
             </div>
 
