@@ -310,7 +310,7 @@ export default function RestaurantApp() {
           --tw-gradient-to: #008C3C !important;
         }
       `}</style>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 pb-16 md:pb-0">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 pb-16 md:pb-0 pt-[140px] md:pt-[100px]">
         <Header
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -441,7 +441,7 @@ function Header({ currentPage, setCurrentPage, setShowCart, searchQuery, setSear
   const { getTotalItems } = useCart();
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="fixed top-0 left-0 right-0 z-50">
       <div className="bg-green-600">
         <div className="w-full px-8 py-3">
           <div className="flex items-center justify-between">
@@ -846,7 +846,7 @@ function MenuPage({ selectedCategory, setSelectedCategory, searchQuery, menuData
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Category Filter - Right below header */}
-      <div className="bg-white shadow-md sticky top-[73px] z-40">
+      <div className="bg-white shadow-md sticky top-[140px] md:top-[100px] z-40">
         <div className="w-full px-8">
           <div className="flex overflow-x-auto space-x-1 py-3 scrollbar-hide">
             {categories.map(category => (
@@ -1025,7 +1025,7 @@ function CartPage({ setCurrentPage }) {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-5 sticky top-24">
+            <div className="bg-white rounded-lg shadow-sm p-5 sticky top-[160px] md:top-[120px]">
               <h3 className="text-base font-medium text-gray-800 mb-4">Order Summary</h3>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm text-gray-600">
@@ -1528,7 +1528,7 @@ function CheckoutPage({ setCurrentPage, clearCart }) {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm p-5 sticky top-24">
+          <div className="bg-white rounded-lg shadow-sm p-5 sticky top-[160px] md:top-[120px]">
             <h3 className="text-base font-medium text-gray-800 mb-4">Order Summary</h3>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm text-gray-600">
